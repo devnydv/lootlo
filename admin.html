@@ -514,7 +514,7 @@ async function loadCategories() {
     return;
   }
 
-  snap.forEach(child => { cachedCategories.push({ _key: child.key, ...child.val() }); });
+  snap.forEach(child => { cachedCategories.push({ _key: child.key, ...child.val() }); return false; });
   document.getElementById('cats-count').textContent = `(${cachedCategories.length})`;
 
   cachedCategories.forEach(cat => {
@@ -628,7 +628,7 @@ async function loadCards() {
   list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">Loading…</div>';
   if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No cards yet.</div>'; document.getElementById('cards-count').textContent = ''; return; }
   const items = [];
-  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); return false; });
   items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   document.getElementById('cards-count').textContent = `(${items.length})`;
   list.innerHTML = '';
@@ -756,7 +756,7 @@ async function loadTrending() {
   list.innerHTML = '';
   if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No items yet.</div>'; document.getElementById('trends-count').textContent=''; return; }
   const items = [];
-  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); return false; });
   items.sort((a, b) => (a.rank||0) - (b.rank||0));
   document.getElementById('trends-count').textContent = `(${items.length})`;
   items.forEach(t => {
@@ -834,7 +834,7 @@ async function loadTopPicks() {
   list.innerHTML = '';
   if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No picks yet.</div>'; document.getElementById('picks-count').textContent=''; return; }
   const items = [];
-  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); return false; });
   items.sort((a, b) => (a.sortOrder||0) - (b.sortOrder||0));
   document.getElementById('picks-count').textContent = `(${items.length})`;
   items.forEach(p => {
@@ -952,7 +952,7 @@ async function loadHeat() {
   list.innerHTML = '';
   if (!snap.exists()) { list.innerHTML='<div style="color:var(--muted);font-size:.78rem">No categories yet.</div>'; document.getElementById('heat-count').textContent=''; return; }
   const items=[];
-  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); return false; });
   items.sort((a,b) => b.activity - a.activity);
   document.getElementById('heat-count').textContent=`(${items.length})`;
   items.forEach(h => {

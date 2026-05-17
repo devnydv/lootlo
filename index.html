@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Lowoncost</title>
-  <meta name="description" content="LowonCost is your go-to guide for affordable fashion. We handpick the best stores across categories, so you can shop smarter, not harder. Every link is pre-filtered to land you directly in the right section — no hunting needed. " />
-  <meta property="og:title" content="LowonCost - Curated Affordable Fashion Picks" />
-  <meta property="og:description" content="LowonCost is your go-to guide for affordable fashion. We handpick the best stores across categories, so you can shop smarter, not harder. Every link is pre-filtered to land you directly in the right section — no hunting needed." />
-  <meta property="og:image" content="LowonCost.png" />
+  <title>Lowoncost - Curated Fashion Deals</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="shortcut icon" href="icon.webp" type="image/x-icon">
-  
+  <meta name="description"
+    content="Discover the best fashion deals with Lowoncost. Our curated picks connect you to top stores with pre-filtered links, ensuring a smarter shopping experience. Shop confidently with our trusted recommendations and affiliate links." />
+    <meta name="keywords" content="fashion deals, curated picks, top stores, pre-filtered links, smart shopping, affiliate links, trusted recommendations" />
+    <meta property="og:title" content="Lowoncost - Curated Fashion Deals" />
+    <meta property="og:description" content="Discover the best fashion deals with Lowoncost. Our curated picks connect you to top stores with pre-filtered links, ensuring a smarter shopping experience. Shop confidently with our trusted recommendations and affiliate links." />
+    <meta property="og:image" content="https://lowoncost.com/LowonCost.png" />
 </head>
 
 <body>
@@ -50,16 +50,11 @@
       </div>
     </div>
 
-    <!-- CHIPS -->
+    <!-- CHIPS (built dynamically from Firebase categories) -->
     <div class="chips-wrap">
       <div class="chips" id="chips">
         <div class="chip active" data-cat="all"><span class="chip-icon">✦</span> All</div>
-        <div class="chip" data-cat="mens"><span class="chip-icon">👔</span> Men's</div>
-        <div class="chip" data-cat="womens"><span class="chip-icon">👗</span> Women's</div>
-        <div class="chip" data-cat="kids"><span class="chip-icon">🧒</span> Kids</div>
-        <div class="chip" data-cat="footwear"><span class="chip-icon">👟</span> Footwear</div>
-        <div class="chip" data-cat="accessories"><span class="chip-icon">👜</span> Accessories</div>
-        <div class="chip" data-cat="activewear"><span class="chip-icon">🏋️</span> Activewear</div>
+        <!-- category chips injected here by JS -->
       </div>
     </div>
 
@@ -129,7 +124,7 @@
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">
-      <a class="bottom-tab active" href="index.html">
+      <a class="bottom-tab active" href="lowoncost.html">
         <div class="bottom-tab-icon">🏠</div>
         <div class="bottom-tab-label">Home</div>
       </a>
@@ -160,13 +155,13 @@
         <div class="progress-wrap">
           <div class="progress-bar" id="sheet-progress"></div>
         </div>
-        <p class="sheet-disclaimer">⚡ Affiliate link — StyleVault may earn a commission at no extra cost to you.</p>
+        <p class="sheet-disclaimer">⚡ Affiliate link — LowonCost may earn a commission at no extra cost to you.</p>
         <button class="btn-go" id="btn-go">Continue to Store →</button>
         <button class="btn-back" id="btn-back">Go back</button>
       </div>
     </div>
   </div>
-  <!-- <script rel="preload" src="firebase-config.js"></script> -->
+
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -183,16 +178,14 @@
 
     // ── State ─────────────────────────────────────────────
     let activeFilter = 'all';
-    let lastKey = null;   // last card key for cursor-based pagination
+    let lastKey = null;
     let loading = false;
-    let exhausted = false;  // no more items to load
-    let allCards = [];     // in-memory cache per filter session
+    let exhausted = false;
+    let allCards = [];
 
-    const CAT_ORDER = ['mens', 'womens', 'kids', 'footwear', 'accessories', 'activewear'];
-    const CAT_LABELS = {
-      mens: "Men's Wear", womens: "Women's Wear", kids: "Kids' Fashion",
-      footwear: "Footwear", accessories: "Accessories", activewear: "Activewear"
-    };
+    // Populated from Firebase 'categories' node
+    let CAT_LABELS = {};  // { mens: "Men's Wear", ... }
+    let CAT_ORDER = [];  // ['mens', 'womens', ...] sorted by sortOrder
 
     // ── Visited (localStorage) ────────────────────────────
     function getVisited() {
@@ -255,8 +248,9 @@
       snap.forEach(child => {
         const card = { _key: child.key, ...child.val() };
         // For category filter, only include cards whose cat matches
-        if (filter !== 'all' && card.cat !== filter) return;
+        if (filter !== 'all' && card.cat !== filter) return false;
         results.push(card);
+        return false; // prevent Firebase forEach early termination
       });
       return results;
     }
@@ -495,8 +489,37 @@
       if (e.target === document.getElementById('overlay')) closeSheet();
     });
 
+    // ── Load categories from Firebase → build chips ───────
+    async function loadCategories() {
+      try {
+        const snap = await get(query(ref(db, 'categories'), orderByChild('sortOrder')));
+        const chipsEl = document.getElementById('chips');
+
+        if (snap.exists()) {
+          snap.forEach(child => {
+            const c = child.val();
+            CAT_LABELS[c.id] = c.label;
+            CAT_ORDER.push(c.id);
+
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.dataset.cat = c.id;
+            chip.innerHTML = `<span class="chip-icon">${c.emoji || '✦'}</span> ${c.label}`;
+            chipsEl.appendChild(chip);
+            return false; // prevent Firebase forEach from stopping early
+          });
+        } else {
+          // Fallback: no categories node — derive from cards already loaded
+          // (chips will just show "All" until categories are seeded)
+        }
+      } catch (e) {
+        console.warn('Could not load categories:', e);
+      }
+    }
+
     // ── Initial load ──────────────────────────────────────
     showSkeletons(3);
+    await loadCategories();
     loadMore();
   </script>
 
