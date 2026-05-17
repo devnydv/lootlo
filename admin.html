@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StyleVault Admin</title>
+  <style>
+    :root {
+      --gold:#e8c97e; --gold-dim:#c8a84e; --gold-glow:rgba(232,201,126,.15);
+      --bg:#0a0a0c; --s1:#111114; --s2:#18181d; --s3:#1f1f26;
+      --border:rgba(255,255,255,.07); --border-gold:rgba(232,201,126,.25);
+      --text:#f0f0f4; --dim:#a0a0b0; --muted:#5a5a6e;
+      --red:#e05c5c; --green:#5ce07a; --blue:#5cb8e0;
+      --r:12px; --r-sm:8px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+    /* ── LOGIN ── */
+    #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+    .login-box{background:var(--s1);border:1px solid var(--border-gold);border-radius:20px;padding:36px 28px;width:100%;max-width:360px;text-align:center}
+    .login-logo{font-size:1.4rem;font-weight:800;margin-bottom:6px}
+    .login-logo span{color:var(--gold)}
+    .login-sub{font-size:.8rem;color:var(--dim);margin-bottom:24px}
+    .login-box input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;color:var(--text);font-size:.9rem;margin-bottom:12px;outline:none}
+    .login-box input:focus{border-color:var(--border-gold)}
+    .btn-primary{width:100%;background:var(--gold);color:#0a0a0c;font-weight:700;font-size:.9rem;padding:13px;border-radius:var(--r-sm);border:none;cursor:pointer;transition:opacity .15s}
+    .btn-primary:hover{opacity:.9}
+    .login-err{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
+
+    /* ── LAYOUT ── */
+    #app{display:none}
+    .admin-nav{position:sticky;top:0;background:rgba(10,10,12,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;z-index:100}
+    .admin-logo{font-size:1rem;font-weight:800}.admin-logo span{color:var(--gold)}
+    .admin-logo small{font-size:.65rem;color:var(--muted);font-weight:500;margin-left:6px;letter-spacing:1px;text-transform:uppercase}
+    .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.75rem;padding:5px 12px;border-radius:20px;cursor:pointer}
+    .btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+    .tabs{display:flex;gap:2px;padding:16px 20px 0;overflow-x:auto;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{white-space:nowrap;padding:8px 16px;border-radius:var(--r-sm) var(--r-sm) 0 0;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted);background:transparent;border:1px solid transparent;border-bottom:none;transition:all .15s}
+    .tab.active{background:var(--s1);border-color:var(--border);color:var(--gold)}
+
+    .tab-content{display:none;padding:20px;max-width:900px}
+    .tab-content.active{display:block}
+
+    /* ── PANELS ── */
+    .panel{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
+    .panel-title{font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+    .panel-title span{font-weight:500;color:var(--muted);font-size:.72rem}
+
+    /* ── FORM ELEMENTS ── */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-grid.full{grid-template-columns:1fr}
+    @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:.72rem;font-weight:600;color:var(--dim);letter-spacing:.5px;text-transform:uppercase}
+    .field input,.field textarea,.field select{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:.85rem;outline:none;font-family:inherit;resize:vertical}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--border-gold)}
+    .field textarea{min-height:70px}
+    .field select option{background:var(--s2)}
+
+    /* ── BADGE SELECTORS ── */
+    .badge-select{display:flex;gap:8px;flex-wrap:wrap}
+    .badge-opt{padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none}
+    .badge-opt.top{color:var(--gold);border-color:rgba(232,201,126,.3)}
+    .badge-opt.top.sel{background:rgba(232,201,126,.15)}
+    .badge-opt.hot{color:var(--red);border-color:rgba(224,92,92,.3)}
+    .badge-opt.hot.sel{background:rgba(224,92,92,.12)}
+    .badge-opt.new{color:var(--blue);border-color:rgba(92,184,224,.3)}
+    .badge-opt.new.sel{background:rgba(92,184,224,.12)}
+
+    /* ── STORES BUILDER ── */
+    .stores-builder{display:flex;flex-direction:column;gap:10px}
+    .store-row{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;position:relative}
+    .store-row-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .store-row-num{width:22px;height:22px;border-radius:50%;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);flex-shrink:0}
+    .top-pick-toggle{display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer;font-size:.72rem;color:var(--dim)}
+    .top-pick-toggle input{accent-color:var(--gold)}
+    .remove-store{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px 4px}
+    .remove-store:hover{color:var(--red)}
+    .add-store-btn{background:transparent;border:1px dashed var(--border);color:var(--muted);font-size:.78rem;padding:9px;border-radius:var(--r-sm);cursor:pointer;width:100%;transition:border-color .15s,color .15s}
+    .add-store-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* ── ACTIONS ── */
+    .form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .btn-save{background:var(--gold);color:#0a0a0c;font-weight:700;font-size:.82rem;padding:10px 20px;border-radius:var(--r-sm);border:none;cursor:pointer;transition:opacity .15s}
+    .btn-save:hover{opacity:.9}
+    .btn-save:disabled{opacity:.5;cursor:not-allowed}
+    .btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.82rem;padding:10px 16px;border-radius:var(--r-sm);cursor:pointer}
+    .btn-danger{background:transparent;border:1px solid rgba(224,92,92,.3);color:var(--red);font-size:.78rem;padding:7px 14px;border-radius:var(--r-sm);cursor:pointer}
+    .btn-danger:hover{background:rgba(224,92,92,.08)}
+    .btn-sm{font-size:.72rem;padding:6px 12px}
+
+    /* ── ITEMS LIST ── */
+    .items-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .item-row{display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px}
+    .item-emoji{font-size:1.3rem;flex-shrink:0}
+    .item-info{flex:1;min-width:0}
+    .item-title{font-size:.85rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .item-meta{font-size:.7rem;color:var(--muted)}
+    .item-actions{display:flex;gap:6px;flex-shrink:0}
+    .btn-edit{background:var(--gold-glow);border:1px solid var(--border-gold);color:var(--gold);font-size:.7rem;font-weight:700;padding:5px 10px;border-radius:20px;cursor:pointer}
+    .btn-edit:hover{background:rgba(232,201,126,.25)}
+    .btn-del{background:transparent;border:1px solid rgba(224,92,92,.25);color:var(--red);font-size:.7rem;padding:5px 10px;border-radius:20px;cursor:pointer}
+    .btn-del:hover{background:rgba(224,92,92,.08)}
+
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--border-gold);color:var(--gold);font-size:.8rem;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    #toast.err{border-color:rgba(224,92,92,.4);color:var(--red)}
+
+    /* ── LOADING ── */
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── STATS CARDS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+    .stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;text-align:center}
+    .stat-card-num{font-size:1.5rem;font-weight:800;color:var(--gold);line-height:1;margin-bottom:4px}
+    .stat-card-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+    .section-divider{height:1px;background:var(--border);margin:20px 0}
+    .form-hint{font-size:.7rem;color:var(--muted);margin-top:4px}
+
+    /* order input */
+    .order-input{width:70px !important}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Style<span>Vault</span></div>
+    <div class="login-sub">Admin Panel</div>
+    <input type="password" id="pw-input" placeholder="Enter admin password" />
+    <button class="btn-primary" id="login-btn">Login →</button>
+    <div class="login-err" id="login-err">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="admin-nav">
+    <div class="admin-logo">Style<span>Vault</span> <small>Admin</small></div>
+    <button class="btn-logout" id="logout-btn">Logout</button>
+  </nav>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" data-tab="dashboard">📊 Dashboard</div>
+    <div class="tab" data-tab="categories">🏷️ Categories</div>
+    <div class="tab" data-tab="cards">🃏 Cards</div>
+    <div class="tab" data-tab="trending">🔥 Trending</div>
+    <div class="tab" data-tab="toppicks">⭐ Top Picks</div>
+    <div class="tab" data-tab="spotlight">💡 Spotlight</div>
+    <div class="tab" data-tab="heat">🌡️ Heat Grid</div>
+    <div class="tab" data-tab="seed">🌱 Seed Data</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-grid" id="dash-stats">
+      <div class="stat-card"><div class="stat-card-num" id="ds-cats">–</div><div class="stat-card-lbl">Categories</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="ds-cards">–</div><div class="stat-card-lbl">Cards</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="ds-picks">–</div><div class="stat-card-lbl">Top Picks</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="ds-trends">–</div><div class="stat-card-lbl">Trending Items</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="ds-heat">–</div><div class="stat-card-lbl">Heat Categories</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Quick Tips</div>
+      <ul style="font-size:.82rem;color:var(--dim);line-height:2;padding-left:18px">
+        <li>Cards are paginated on the frontend — add <strong style="color:var(--text)">sortOrder</strong> (number) to control order.</li>
+        <li>For category filtering, also set <strong style="color:var(--text)">catSort</strong> = <code style="color:var(--gold)">"mens_001"</code> (cat + zero-padded order).</li>
+        <li>The Seed tab will populate sample data if your DB is empty.</li>
+        <li>Changes are live immediately — no redeploy needed.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CATEGORIES TAB -->
+  <div class="tab-content" id="tab-categories">
+    <div class="panel">
+      <div class="panel-title">Categories <span id="cats-count"></span></div>
+      <p style="font-size:.78rem;color:var(--dim);margin-bottom:14px;line-height:1.6">
+        Categories drive the filter chips on the home page and the category dropdown when creating cards.
+        Set <strong style="color:var(--text)">Sort Order</strong> to control chip order (lower = first).
+      </p>
+      <div class="items-list" id="cats-list"></div>
+      <button class="btn-save" id="new-cat-btn">+ New Category</button>
+    </div>
+
+    <div class="panel" id="cat-form-panel" style="display:none">
+      <div class="panel-title" id="cat-form-title">New Category</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Category ID (slug)</label>
+          <input type="text" id="catf-id" placeholder="e.g. ethnic, luxury, plus-size" />
+          <span class="form-hint">Lowercase, no spaces. Used as the filter key in cards.</span>
+        </div>
+        <div class="field">
+          <label>Label (display name)</label>
+          <input type="text" id="catf-label" placeholder="e.g. Ethnic Wear" />
+        </div>
+        <div class="field">
+          <label>Emoji</label>
+          <input type="text" id="catf-emoji" placeholder="👘" />
+        </div>
+        <div class="field">
+          <label>Sort Order <span class="form-hint">(lower = first chip)</span></label>
+          <input type="number" id="catf-order" placeholder="10" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" id="catf-save-btn">Save Category</button>
+        <button class="btn-cancel" id="catf-cancel-btn">Cancel</button>
+        <button class="btn-danger btn-sm" id="catf-delete-btn" style="display:none">Delete Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS TAB -->
+  <div class="tab-content" id="tab-cards">
+    <div class="panel">
+      <div class="panel-title">All Cards <span id="cards-count"></span></div>
+      <div class="items-list" id="cards-list"></div>
+      <button class="btn-save" id="new-card-btn">+ New Card</button>
+    </div>
+
+    <!-- CARD FORM (hidden by default) -->
+    <div class="panel" id="card-form-panel" style="display:none">
+      <div class="panel-title" id="card-form-title">New Card</div>
+
+      <div class="form-grid">
+        <div class="field"><label>Card ID (slug)</label><input type="text" id="cf-id" placeholder="mens-shirts" /></div>
+        <div class="field"><label>Category</label>
+          <select id="cf-cat">
+            <option value="">Loading categories…</option>
+          </select>
+        </div>
+        <div class="field"><label>Emoji</label><input type="text" id="cf-emoji" placeholder="👔" /></div>
+        <div class="field"><label>Sort Order <span class="form-hint">(lower = first)</span></label><input type="number" id="cf-order" placeholder="10" class="order-input"/></div>
+      </div>
+
+      <div class="form-grid full" style="margin-top:12px">
+        <div class="field"><label>Title</label><input type="text" id="cf-title" placeholder="Best Formal Shirts for Men" /></div>
+        <div class="field"><label>Description</label><textarea id="cf-desc" placeholder="Short description shown on the card…"></textarea></div>
+      </div>
+
+      <div class="field" style="margin-top:12px">
+        <label>Badge</label>
+        <div class="badge-select" id="cf-badge-select">
+          <div class="badge-opt top sel" data-val="top" data-label="Editor's Pick">★ Editor's Pick</div>
+          <div class="badge-opt hot" data-val="hot" data-label="Trending">🔥 Trending</div>
+          <div class="badge-opt new" data-val="new" data-label="New Arrivals">✦ New Arrivals</div>
+        </div>
+        <input type="hidden" id="cf-badge" value="top" />
+        <input type="hidden" id="cf-badgelabel" value="Editor's Pick" />
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="panel-title" style="margin-bottom:12px">Stores</div>
+      <div class="stores-builder" id="cf-stores"></div>
+      <button class="add-store-btn" id="add-store-btn">+ Add Store</button>
+
+      <div class="form-actions">
+        <button class="btn-save" id="cf-save-btn">Save Card</button>
+        <button class="btn-cancel" id="cf-cancel-btn">Cancel</button>
+        <button class="btn-danger btn-sm" id="cf-delete-btn" style="display:none">Delete Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRENDING TAB -->
+  <div class="tab-content" id="tab-trending">
+    <div class="panel">
+      <div class="panel-title">Trending Items <span id="trends-count"></span></div>
+      <div class="items-list" id="trends-list"></div>
+      <button class="btn-save" id="new-trend-btn">+ New Trending Item</button>
+    </div>
+
+    <div class="panel" id="trend-form-panel" style="display:none">
+      <div class="panel-title" id="trend-form-title">New Trending Item</div>
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input type="text" id="tf-name" placeholder="Men's Slim Jeans" /></div>
+        <div class="field"><label>Emoji</label><input type="text" id="tf-emoji" placeholder="👖" /></div>
+        <div class="field"><label>URL</label><input type="url" id="tf-url" placeholder="https://..." /></div>
+        <div class="field"><label>Meta (stores shown)</label><input type="text" id="tf-meta" placeholder="Levi's · Myntra" /></div>
+        <div class="field"><label>Rank (order)</label><input type="number" id="tf-rank" placeholder="1" /></div>
+        <div class="field"><label>Change Direction</label>
+          <select id="tf-dir">
+            <option value="up">↑ Up</option>
+            <option value="down">↓ Down</option>
+            <option value="new">New</option>
+          </select>
+        </div>
+        <div class="field"><label>Change Value (e.g. 34%)</label><input type="text" id="tf-val" placeholder="34%" /></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" id="tf-save-btn">Save</button>
+        <button class="btn-cancel" id="tf-cancel-btn">Cancel</button>
+        <button class="btn-danger btn-sm" id="tf-delete-btn" style="display:none">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP PICKS TAB -->
+  <div class="tab-content" id="tab-toppicks">
+    <div class="panel">
+      <div class="panel-title">Top Picks <span id="picks-count"></span></div>
+      <div class="items-list" id="picks-list"></div>
+      <button class="btn-save" id="new-pick-btn">+ New Top Pick</button>
+    </div>
+
+    <div class="panel" id="pick-form-panel" style="display:none">
+      <div class="panel-title" id="pick-form-title">New Top Pick</div>
+      <div class="form-grid">
+        <div class="field"><label>Category Label</label><input type="text" id="pf-cat" placeholder="Men's Wear" /></div>
+        <div class="field"><label>Emoji</label><input type="text" id="pf-emoji" placeholder="👔" /></div>
+        <div class="field"><label>Sort Order</label><input type="number" id="pf-order" placeholder="10" /></div>
+      </div>
+      <div class="form-grid full" style="margin-top:12px">
+        <div class="field"><label>Title</label><input type="text" id="pf-title" placeholder="Best Formal Shirts for Men" /></div>
+        <div class="field"><label>Description</label><textarea id="pf-desc"></textarea></div>
+      </div>
+      <div class="section-divider"></div>
+      <div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:12px">Store</div>
+      <div class="form-grid">
+        <div class="field"><label>Store Name</label><input type="text" id="pf-sname" /></div>
+        <div class="field"><label>Store Icon (emoji)</label><input type="text" id="pf-sicon" placeholder="🛒" /></div>
+        <div class="field"><label>Store Sub-label</label><input type="text" id="pf-ssub" placeholder="Huge collection, fast delivery" /></div>
+        <div class="field"><label>Store URL</label><input type="url" id="pf-surl" placeholder="https://..." /></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" id="pf-save-btn">Save</button>
+        <button class="btn-cancel" id="pf-cancel-btn">Cancel</button>
+        <button class="btn-danger btn-sm" id="pf-delete-btn" style="display:none">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPOTLIGHT TAB -->
+  <div class="tab-content" id="tab-spotlight">
+    <div class="panel">
+      <div class="panel-title">Spotlight of the Day</div>
+      <div class="form-grid full">
+        <div class="field"><label>Title (HTML — use &lt;em&gt; for gold text)</label><input type="text" id="sl-title" placeholder="Men's &lt;em&gt;Slim Jeans&lt;/em&gt; are everywhere" /></div>
+        <div class="field"><label>Description</label><textarea id="sl-desc"></textarea></div>
+      </div>
+      <div class="section-divider"></div>
+      <div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:12px">Spotlight Stores</div>
+      <div class="stores-builder" id="sl-stores"></div>
+      <button class="add-store-btn" id="sl-add-store-btn">+ Add Store</button>
+      <div class="form-actions">
+        <button class="btn-save" id="sl-save-btn">Save Spotlight</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEAT GRID TAB -->
+  <div class="tab-content" id="tab-heat">
+    <div class="panel">
+      <div class="panel-title">Heat Categories <span id="heat-count"></span></div>
+      <div class="items-list" id="heat-list"></div>
+      <button class="btn-save" id="new-heat-btn">+ New Heat Category</button>
+    </div>
+
+    <div class="panel" id="heat-form-panel" style="display:none">
+      <div class="panel-title" id="heat-form-title">New Heat Category</div>
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input type="text" id="hf-name" placeholder="Men's Wear" /></div>
+        <div class="field"><label>Emoji</label><input type="text" id="hf-emoji" placeholder="👔" /></div>
+        <div class="field"><label>Activity %</label><input type="number" id="hf-activity" placeholder="88" min="0" max="100" /></div>
+        <div class="field"><label>Bar Color (CSS)</label><input type="text" id="hf-color" placeholder="var(--gold)" /></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" id="hf-save-btn">Save</button>
+        <button class="btn-cancel" id="hf-cancel-btn">Cancel</button>
+        <button class="btn-danger btn-sm" id="hf-delete-btn" style="display:none">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEED TAB -->
+  <div class="tab-content" id="tab-seed">
+    <div class="panel">
+      <div class="panel-title">Seed Database</div>
+      <p style="font-size:.82rem;color:var(--dim);line-height:1.7;margin-bottom:16px">
+        This will write the default StyleVault data into Firebase. Use this on a fresh database.
+        <strong style="color:var(--red)">Warning: existing data at these paths will be overwritten.</strong>
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-save" id="seed-all-btn">Seed All Data</button>
+        <button class="btn-cancel" id="seed-cats-btn">Seed Categories Only</button>
+        <button class="btn-cancel" id="seed-cards-btn">Seed Cards Only</button>
+        <button class="btn-cancel" id="seed-trending-btn">Seed Trending Only</button>
+        <button class="btn-cancel" id="seed-picks-btn">Seed Top Picks Only</button>
+        <button class="btn-cancel" id="seed-misc-btn">Seed Spotlight + Heat</button>
+      </div>
+      <div id="seed-log" style="margin-top:16px;font-size:.75rem;color:var(--muted);font-family:monospace;line-height:1.8;max-height:300px;overflow-y:auto;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;display:none"></div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<div id="toast"></div>
+
+<script src="firebase-config.js"></script>
+<script type="module">
+import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set, push, remove, update, orderByChild, query, limitToFirst }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ── Init ──────────────────────────────────────────────
+const app = initializeApp(window.FIREBASE_CONFIG, 'admin');
+const db  = getDatabase(app);
+
+// ── Auth (simple password) ────────────────────────────
+const SESSION_KEY = 'sv_admin_session';
+function checkAuth() {
+  return sessionStorage.getItem(SESSION_KEY) === 'ok';
+}
+
+document.getElementById('login-btn').addEventListener('click', tryLogin);
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+function tryLogin() {
+  if (document.getElementById('pw-input').value === window.ADMIN_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, 'ok');
+    showApp();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadDashboard();
+}
+
+if (checkAuth()) showApp();
+
+// ── Toast ─────────────────────────────────────────────
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = isErr ? 'show err' : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+
+// ── Tabs ──────────────────────────────────────────────
+const TAB_LOADERS = {
+  dashboard:  loadDashboard,
+  categories: loadCategories,
+  cards:      loadCards,
+  trending:   loadTrending,
+  toppicks:   loadTopPicks,
+  spotlight:  loadSpotlight,
+  heat:       loadHeat,
+  seed:       () => {}
+};
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const id = t.dataset.tab;
+    document.getElementById(`tab-${id}`).classList.add('active');
+    (TAB_LOADERS[id] || (() => {}))();
+  });
+});
+
+// ── Dashboard ─────────────────────────────────────────
+async function loadDashboard() {
+  const [cats, cards, picks, trends, heat] = await Promise.all([
+    get(ref(db, 'categories')),
+    get(ref(db, 'cards')),
+    get(ref(db, 'topPicks')),
+    get(ref(db, 'trending')),
+    get(ref(db, 'heatCategories'))
+  ]);
+  document.getElementById('ds-cats').textContent   = cats.exists()   ? Object.keys(cats.val()).length   : 0;
+  document.getElementById('ds-cards').textContent  = cards.exists()  ? Object.keys(cards.val()).length  : 0;
+  document.getElementById('ds-picks').textContent  = picks.exists()  ? Object.keys(picks.val()).length  : 0;
+  document.getElementById('ds-trends').textContent = trends.exists() ? Object.keys(trends.val()).length : 0;
+  document.getElementById('ds-heat').textContent   = heat.exists()   ? Object.keys(heat.val()).length   : 0;
+}
+
+// ─────────────────────────────────────────────────────
+//  CATEGORIES
+// ─────────────────────────────────────────────────────
+let editingCatKey  = null;
+let cachedCategories = []; // used to populate card form's select
+
+async function loadCategories() {
+  const snap = await get(query(ref(db, 'categories'), orderByChild('sortOrder')));
+  const list  = document.getElementById('cats-list');
+  list.innerHTML = '';
+  cachedCategories = [];
+
+  if (!snap.exists()) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No categories yet. Use Seed Data to add defaults.</div>';
+    document.getElementById('cats-count').textContent = '';
+    return;
+  }
+
+  snap.forEach(child => { cachedCategories.push({ _key: child.key, ...child.val() }); });
+  document.getElementById('cats-count').textContent = `(${cachedCategories.length})`;
+
+  cachedCategories.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-emoji">${cat.emoji || '🏷️'}</div>
+      <div class="item-info">
+        <div class="item-title">${cat.label}</div>
+        <div class="item-meta">id: ${cat.id} · order ${cat.sortOrder ?? '–'}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit">Edit</button>
+        <button class="btn-del">✕</button>
+      </div>`;
+    row.querySelector('.btn-edit').addEventListener('click', () => openCatForm(cat));
+    row.querySelector('.btn-del').addEventListener('click', async () => {
+      if (confirm(`Delete category "${cat.label}"?\nCards using id "${cat.id}" will still exist but won't appear in the filter chip.`)) {
+        await remove(ref(db, `categories/${cat._key}`));
+        toast('Category deleted');
+        loadCategories();
+        loadDashboard();
+      }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openCatForm(cat = null) {
+  editingCatKey = cat ? cat._key : null;
+  document.getElementById('cat-form-panel').style.display = 'block';
+  document.getElementById('cat-form-title').textContent   = cat ? 'Edit Category' : 'New Category';
+  document.getElementById('catf-delete-btn').style.display = cat ? 'inline-block' : 'none';
+  document.getElementById('catf-id').value    = cat?.id         || '';
+  document.getElementById('catf-label').value = cat?.label      || '';
+  document.getElementById('catf-emoji').value = cat?.emoji      || '';
+  document.getElementById('catf-order').value = cat?.sortOrder  ?? '';
+  // Lock ID field when editing (changing id would break card references)
+  document.getElementById('catf-id').disabled = !!cat;
+  document.getElementById('cat-form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('new-cat-btn').addEventListener('click', () => openCatForm());
+document.getElementById('catf-cancel-btn').addEventListener('click', () => {
+  document.getElementById('cat-form-panel').style.display = 'none';
+});
+document.getElementById('catf-delete-btn').addEventListener('click', async () => {
+  if (editingCatKey && confirm('Delete this category?')) {
+    await remove(ref(db, `categories/${editingCatKey}`));
+    toast('Category deleted');
+    document.getElementById('cat-form-panel').style.display = 'none';
+    loadCategories(); loadDashboard();
+  }
+});
+
+document.getElementById('catf-save-btn').addEventListener('click', async () => {
+  const id    = document.getElementById('catf-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+  const label = document.getElementById('catf-label').value.trim();
+  if (!id || !label) { toast('ID and Label are required', true); return; }
+
+  const catData = {
+    id,
+    label,
+    emoji:     document.getElementById('catf-emoji').value.trim(),
+    sortOrder: parseInt(document.getElementById('catf-order').value) || 0
+  };
+
+  const btn = document.getElementById('catf-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try {
+    // Always write at categories/<id> so the ID is the key (easy lookup)
+    if (editingCatKey) {
+      await set(ref(db, `categories/${editingCatKey}`), catData);
+    } else {
+      await set(ref(db, `categories/${id}`), catData);
+    }
+    toast('Category saved ✓');
+    document.getElementById('cat-form-panel').style.display = 'none';
+    loadCategories(); loadDashboard();
+  } catch (e) { toast('Error: ' + e.message, true); }
+  finally { btn.disabled = false; btn.textContent = 'Save Category'; }
+});
+
+// Helper: populate the category <select> in the card form from cachedCategories
+async function populateCatSelect(currentVal) {
+  const sel = document.getElementById('cf-cat');
+  // If cache is empty, fetch fresh
+  if (!cachedCategories.length) await loadCategories();
+  sel.innerHTML = '';
+  if (!cachedCategories.length) {
+    sel.innerHTML = '<option value="">No categories — add some first</option>';
+    return;
+  }
+  cachedCategories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.emoji || ''} ${c.label}`.trim();
+    if (c.id === currentVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// ─────────────────────────────────────────────────────
+//  CARDS
+// ─────────────────────────────────────────────────────
+let editingCardKey = null;
+
+async function loadCards() {
+  const snap = await get(ref(db, 'cards'));
+  const list = document.getElementById('cards-list');
+  list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">Loading…</div>';
+  if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No cards yet.</div>'; document.getElementById('cards-count').textContent = ''; return; }
+  const items = [];
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  document.getElementById('cards-count').textContent = `(${items.length})`;
+  list.innerHTML = '';
+  items.forEach(card => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-emoji">${card.emoji || '🃏'}</div>
+      <div class="item-info">
+        <div class="item-title">${card.title}</div>
+        <div class="item-meta">${card.cat} · ${(card.stores||[]).length} stores · order ${card.sortOrder ?? '–'}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" data-key="${card._key}">Edit</button>
+        <button class="btn-del" data-key="${card._key}">✕</button>
+      </div>`;
+    row.querySelector('.btn-edit').addEventListener('click', () => openCardForm(card));
+    row.querySelector('.btn-del').addEventListener('click', async () => {
+      if (confirm(`Delete "${card.title}"?`)) { await remove(ref(db, `cards/${card._key}`)); toast('Card deleted'); loadCards(); loadDashboard(); }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openCardForm(card = null) {
+  editingCardKey = card ? card._key : null;
+  document.getElementById('card-form-panel').style.display = 'block';
+  document.getElementById('card-form-title').textContent = card ? 'Edit Card' : 'New Card';
+  document.getElementById('cf-delete-btn').style.display = card ? 'inline-block' : 'none';
+
+  document.getElementById('cf-id').value    = card?.id    || '';
+  document.getElementById('cf-emoji').value = card?.emoji || '';
+  document.getElementById('cf-order').value = card?.sortOrder ?? '';
+  document.getElementById('cf-title').value = card?.title || '';
+  document.getElementById('cf-desc').value  = card?.desc  || '';
+
+  // Populate category select from Firebase
+  populateCatSelect(card?.cat || '');
+
+  // Badge
+  const badgeVal = card?.badge || 'top';
+  document.getElementById('cf-badge').value      = badgeVal;
+  document.getElementById('cf-badgelabel').value = card?.badgeLabel || "Editor's Pick";
+  document.querySelectorAll('#cf-badge-select .badge-opt').forEach(o => {
+    o.classList.toggle('sel', o.dataset.val === badgeVal);
+  });
+
+  // Stores
+  buildStoresUI('cf-stores', card?.stores || [{ name:'', icon:'🛒', sub:'', url:'', topPick:true }]);
+
+  document.getElementById('card-form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('new-card-btn').addEventListener('click', () => openCardForm());
+document.getElementById('cf-cancel-btn').addEventListener('click', () => {
+  document.getElementById('card-form-panel').style.display = 'none';
+});
+document.getElementById('cf-delete-btn').addEventListener('click', async () => {
+  if (editingCardKey && confirm('Delete this card?')) {
+    await remove(ref(db, `cards/${editingCardKey}`));
+    toast('Card deleted'); document.getElementById('card-form-panel').style.display = 'none';
+    loadCards(); loadDashboard();
+  }
+});
+
+// Badge selector
+document.querySelectorAll('#cf-badge-select .badge-opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('#cf-badge-select .badge-opt').forEach(o => o.classList.remove('sel'));
+    opt.classList.add('sel');
+    document.getElementById('cf-badge').value      = opt.dataset.val;
+    document.getElementById('cf-badgelabel').value = opt.dataset.label;
+  });
+});
+
+document.getElementById('add-store-btn').addEventListener('click', () => {
+  addStoreRow('cf-stores');
+});
+
+document.getElementById('cf-save-btn').addEventListener('click', async () => {
+  const id    = document.getElementById('cf-id').value.trim();
+  const title = document.getElementById('cf-title').value.trim();
+  if (!id || !title) { toast('Card ID and Title are required', true); return; }
+
+  const sortOrder = parseInt(document.getElementById('cf-order').value) || 0;
+  const cat       = document.getElementById('cf-cat').value;
+  const padded    = String(sortOrder).padStart(5, '0');
+
+  const card = {
+    id,
+    cat,
+    emoji:      document.getElementById('cf-emoji').value.trim(),
+    title,
+    desc:       document.getElementById('cf-desc').value.trim(),
+    badge:      document.getElementById('cf-badge').value,
+    badgeLabel: document.getElementById('cf-badgelabel').value,
+    sortOrder,
+    catSort:    `${cat}_${padded}`,
+    stores:     readStoresUI('cf-stores')
+  };
+
+  const saveRef = editingCardKey
+    ? ref(db, `cards/${editingCardKey}`)
+    : ref(db, `cards/${id}`);
+
+  const btn = document.getElementById('cf-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try {
+    await set(saveRef, card);
+    toast('Card saved ✓');
+    document.getElementById('card-form-panel').style.display = 'none';
+    loadCards(); loadDashboard();
+  } catch (e) { toast('Save failed: ' + e.message, true); }
+  finally { btn.disabled = false; btn.textContent = 'Save Card'; }
+});
+
+// ─────────────────────────────────────────────────────
+//  TRENDING
+// ─────────────────────────────────────────────────────
+let editingTrendKey = null;
+
+async function loadTrending() {
+  const snap = await get(ref(db, 'trending'));
+  const list = document.getElementById('trends-list');
+  list.innerHTML = '';
+  if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No items yet.</div>'; document.getElementById('trends-count').textContent=''; return; }
+  const items = [];
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  items.sort((a, b) => (a.rank||0) - (b.rank||0));
+  document.getElementById('trends-count').textContent = `(${items.length})`;
+  items.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-emoji">${t.emoji}</div>
+      <div class="item-info">
+        <div class="item-title">#${t.rank} ${t.name}</div>
+        <div class="item-meta">${t.meta || ''} · ${t.changeDir} ${t.changeVal||''}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" data-key="${t._key}">Edit</button>
+        <button class="btn-del" data-key="${t._key}">✕</button>
+      </div>`;
+    row.querySelector('.btn-edit').addEventListener('click', () => openTrendForm(t));
+    row.querySelector('.btn-del').addEventListener('click', async () => {
+      if (confirm(`Delete "${t.name}"?`)) { await remove(ref(db, `trending/${t._key}`)); toast('Deleted'); loadTrending(); loadDashboard(); }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openTrendForm(t = null) {
+  editingTrendKey = t ? t._key : null;
+  document.getElementById('trend-form-panel').style.display = 'block';
+  document.getElementById('trend-form-title').textContent = t ? 'Edit Trending Item' : 'New Trending Item';
+  document.getElementById('tf-delete-btn').style.display = t ? 'inline-block' : 'none';
+  document.getElementById('tf-name').value  = t?.name      || '';
+  document.getElementById('tf-emoji').value = t?.emoji     || '';
+  document.getElementById('tf-url').value   = t?.url       || '';
+  document.getElementById('tf-meta').value  = t?.meta      || '';
+  document.getElementById('tf-rank').value  = t?.rank      ?? '';
+  document.getElementById('tf-dir').value   = t?.changeDir || 'up';
+  document.getElementById('tf-val').value   = t?.changeVal || '';
+  document.getElementById('trend-form-panel').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.getElementById('new-trend-btn').addEventListener('click', () => openTrendForm());
+document.getElementById('tf-cancel-btn').addEventListener('click', () => { document.getElementById('trend-form-panel').style.display = 'none'; });
+document.getElementById('tf-delete-btn').addEventListener('click', async () => {
+  if (editingTrendKey && confirm('Delete?')) { await remove(ref(db, `trending/${editingTrendKey}`)); toast('Deleted'); document.getElementById('trend-form-panel').style.display = 'none'; loadTrending(); loadDashboard(); }
+});
+
+document.getElementById('tf-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('tf-name').value.trim();
+  if (!name) { toast('Name is required', true); return; }
+  const item = {
+    name, emoji:   document.getElementById('tf-emoji').value.trim(),
+    url:           document.getElementById('tf-url').value.trim(),
+    meta:          document.getElementById('tf-meta').value.trim(),
+    rank:          parseInt(document.getElementById('tf-rank').value) || 1,
+    changeDir:     document.getElementById('tf-dir').value,
+    changeVal:     document.getElementById('tf-val').value.trim()
+  };
+  const btn = document.getElementById('tf-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try {
+    if (editingTrendKey) await set(ref(db, `trending/${editingTrendKey}`), item);
+    else await push(ref(db, 'trending'), item);
+    toast('Saved ✓'); document.getElementById('trend-form-panel').style.display = 'none';
+    loadTrending(); loadDashboard();
+  } catch (e) { toast('Error: ' + e.message, true); }
+  finally { btn.disabled = false; btn.textContent = 'Save'; }
+});
+
+// ─────────────────────────────────────────────────────
+//  TOP PICKS
+// ─────────────────────────────────────────────────────
+let editingPickKey = null;
+
+async function loadTopPicks() {
+  const snap = await get(ref(db, 'topPicks'));
+  const list = document.getElementById('picks-list');
+  list.innerHTML = '';
+  if (!snap.exists()) { list.innerHTML = '<div style="color:var(--muted);font-size:.78rem">No picks yet.</div>'; document.getElementById('picks-count').textContent=''; return; }
+  const items = [];
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  items.sort((a, b) => (a.sortOrder||0) - (b.sortOrder||0));
+  document.getElementById('picks-count').textContent = `(${items.length})`;
+  items.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-emoji">${p.emoji}</div>
+      <div class="item-info">
+        <div class="item-title">${p.title}</div>
+        <div class="item-meta">${p.cat} · ${p.store?.name || '–'}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" data-key="${p._key}">Edit</button>
+        <button class="btn-del" data-key="${p._key}">✕</button>
+      </div>`;
+    row.querySelector('.btn-edit').addEventListener('click', () => openPickForm(p));
+    row.querySelector('.btn-del').addEventListener('click', async () => {
+      if (confirm(`Delete "${p.title}"?`)) { await remove(ref(db, `topPicks/${p._key}`)); toast('Deleted'); loadTopPicks(); loadDashboard(); }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openPickForm(p = null) {
+  editingPickKey = p ? p._key : null;
+  document.getElementById('pick-form-panel').style.display = 'block';
+  document.getElementById('pick-form-title').textContent = p ? 'Edit Top Pick' : 'New Top Pick';
+  document.getElementById('pf-delete-btn').style.display = p ? 'inline-block' : 'none';
+  document.getElementById('pf-cat').value   = p?.cat         || '';
+  document.getElementById('pf-emoji').value = p?.emoji       || '';
+  document.getElementById('pf-order').value = p?.sortOrder   ?? '';
+  document.getElementById('pf-title').value = p?.title       || '';
+  document.getElementById('pf-desc').value  = p?.desc        || '';
+  document.getElementById('pf-sname').value = p?.store?.name || '';
+  document.getElementById('pf-sicon').value = p?.store?.icon || '';
+  document.getElementById('pf-ssub').value  = p?.store?.sub  || '';
+  document.getElementById('pf-surl').value  = p?.store?.url  || '';
+  document.getElementById('pick-form-panel').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.getElementById('new-pick-btn').addEventListener('click', () => openPickForm());
+document.getElementById('pf-cancel-btn').addEventListener('click', () => { document.getElementById('pick-form-panel').style.display='none'; });
+document.getElementById('pf-delete-btn').addEventListener('click', async () => {
+  if (editingPickKey && confirm('Delete?')) { await remove(ref(db, `topPicks/${editingPickKey}`)); toast('Deleted'); document.getElementById('pick-form-panel').style.display='none'; loadTopPicks(); loadDashboard(); }
+});
+
+document.getElementById('pf-save-btn').addEventListener('click', async () => {
+  const title = document.getElementById('pf-title').value.trim();
+  if (!title) { toast('Title required', true); return; }
+  const pick = {
+    cat:   document.getElementById('pf-cat').value.trim(),
+    emoji: document.getElementById('pf-emoji').value.trim(),
+    sortOrder: parseInt(document.getElementById('pf-order').value) || 0,
+    title, desc: document.getElementById('pf-desc').value.trim(),
+    store: {
+      name: document.getElementById('pf-sname').value.trim(),
+      icon: document.getElementById('pf-sicon').value.trim(),
+      sub:  document.getElementById('pf-ssub').value.trim(),
+      url:  document.getElementById('pf-surl').value.trim()
+    }
+  };
+  const btn = document.getElementById('pf-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try {
+    if (editingPickKey) await set(ref(db, `topPicks/${editingPickKey}`), pick);
+    else await push(ref(db, 'topPicks'), pick);
+    toast('Saved ✓'); document.getElementById('pick-form-panel').style.display='none';
+    loadTopPicks(); loadDashboard();
+  } catch(e) { toast('Error: '+e.message, true); }
+  finally { btn.disabled=false; btn.textContent='Save'; }
+});
+
+// ─────────────────────────────────────────────────────
+//  SPOTLIGHT
+// ─────────────────────────────────────────────────────
+async function loadSpotlight() {
+  const snap = await get(ref(db, 'spotlight'));
+  if (!snap.exists()) {
+    // Fresh DB — initialise the form with one empty store row so it is usable
+    document.getElementById('sl-title').value = '';
+    document.getElementById('sl-desc').value  = '';
+    buildStoresUI('sl-stores', [{ name:'', icon:'', sub:'', url:'', topPick:true }]);
+    return;
+  }
+  const s = snap.val();
+  document.getElementById('sl-title').value = s.title || '';
+  document.getElementById('sl-desc').value  = s.desc  || '';
+  buildStoresUI('sl-stores', s.stores && s.stores.length ? s.stores : [{ name:'', icon:'', sub:'', url:'', topPick:true }]);
+}
+
+document.getElementById('sl-add-store-btn').addEventListener('click', () => addStoreRow('sl-stores'));
+
+document.getElementById('sl-save-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('sl-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try {
+    await set(ref(db, 'spotlight'), {
+      title:  document.getElementById('sl-title').value.trim(),
+      desc:   document.getElementById('sl-desc').value.trim(),
+      stores: readStoresUI('sl-stores')
+    });
+    toast('Spotlight saved ✓');
+  } catch(e) { toast('Error: '+e.message, true); }
+  finally { btn.disabled=false; btn.textContent='Save Spotlight'; }
+});
+
+// ─────────────────────────────────────────────────────
+//  HEAT CATEGORIES
+// ─────────────────────────────────────────────────────
+let editingHeatKey = null;
+
+async function loadHeat() {
+  const snap = await get(ref(db, 'heatCategories'));
+  const list = document.getElementById('heat-list');
+  list.innerHTML = '';
+  if (!snap.exists()) { list.innerHTML='<div style="color:var(--muted);font-size:.78rem">No categories yet.</div>'; document.getElementById('heat-count').textContent=''; return; }
+  const items=[];
+  snap.forEach(c => { items.push({ _key: c.key, ...c.val() }); });
+  items.sort((a,b) => b.activity - a.activity);
+  document.getElementById('heat-count').textContent=`(${items.length})`;
+  items.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-emoji">${h.emoji}</div>
+      <div class="item-info">
+        <div class="item-title">${h.name}</div>
+        <div class="item-meta">${h.activity}% activity</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" data-key="${h._key}">Edit</button>
+        <button class="btn-del" data-key="${h._key}">✕</button>
+      </div>`;
+    row.querySelector('.btn-edit').addEventListener('click', () => openHeatForm(h));
+    row.querySelector('.btn-del').addEventListener('click', async () => {
+      if (confirm(`Delete "${h.name}"?`)) { await remove(ref(db, `heatCategories/${h._key}`)); toast('Deleted'); loadHeat(); loadDashboard(); }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openHeatForm(h = null) {
+  editingHeatKey = h ? h._key : null;
+  document.getElementById('heat-form-panel').style.display = 'block';
+  document.getElementById('heat-form-title').textContent = h ? 'Edit Heat Category' : 'New Heat Category';
+  document.getElementById('hf-delete-btn').style.display = h ? 'inline-block' : 'none';
+  document.getElementById('hf-name').value     = h?.name     || '';
+  document.getElementById('hf-emoji').value    = h?.emoji    || '';
+  document.getElementById('hf-activity').value = h?.activity ?? '';
+  document.getElementById('hf-color').value    = h?.barColor || 'var(--gold)';
+  document.getElementById('heat-form-panel').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.getElementById('new-heat-btn').addEventListener('click', () => openHeatForm());
+document.getElementById('hf-cancel-btn').addEventListener('click', () => { document.getElementById('heat-form-panel').style.display='none'; });
+document.getElementById('hf-delete-btn').addEventListener('click', async () => {
+  if (editingHeatKey && confirm('Delete?')) { await remove(ref(db, `heatCategories/${editingHeatKey}`)); toast('Deleted'); document.getElementById('heat-form-panel').style.display='none'; loadHeat(); loadDashboard(); }
+});
+
+document.getElementById('hf-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('hf-name').value.trim();
+  if (!name) { toast('Name required', true); return; }
+  const item = {
+    name, emoji: document.getElementById('hf-emoji').value.trim(),
+    activity:   parseInt(document.getElementById('hf-activity').value) || 0,
+    barColor:   document.getElementById('hf-color').value.trim() || 'var(--gold)'
+  };
+  const btn = document.getElementById('hf-save-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving…';
+  try {
+    if (editingHeatKey) await set(ref(db, `heatCategories/${editingHeatKey}`), item);
+    else await push(ref(db, 'heatCategories'), item);
+    toast('Saved ✓'); document.getElementById('heat-form-panel').style.display='none';
+    loadHeat(); loadDashboard();
+  } catch(e) { toast('Error: '+e.message, true); }
+  finally { btn.disabled=false; btn.textContent='Save'; }
+});
+
+// ─────────────────────────────────────────────────────
+//  STORE ROW BUILDER (reusable)
+// ─────────────────────────────────────────────────────
+function buildStoresUI(containerId, stores) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  (stores.length ? stores : []).forEach(s => addStoreRow(containerId, s));
+}
+
+function addStoreRow(containerId, store = {}) {
+  const c = document.getElementById(containerId);
+  const num = c.querySelectorAll('.store-row').length + 1;
+  const row = document.createElement('div');
+  row.className = 'store-row';
+  row.innerHTML = `
+    <div class="store-row-header">
+      <div class="store-row-num">${num}</div>
+      <label class="top-pick-toggle">
+        <input type="checkbox" class="sr-top" ${store.topPick ? 'checked' : ''} /> Top Pick
+      </label>
+      <button class="remove-store" title="Remove">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Store Name</label><input type="text" class="sr-name" value="${store.name||''}" placeholder="Myntra" /></div>
+      <div class="field"><label>Icon (emoji)</label><input type="text" class="sr-icon" value="${store.icon||''}" placeholder="🛒" /></div>
+      <div class="field"><label>Sub-label</label><input type="text" class="sr-sub" value="${store.sub||''}" placeholder="Best deals…" /></div>
+      <div class="field"><label>URL</label><input type="url" class="sr-url" value="${store.url||''}" placeholder="https://…" /></div>
+    </div>`;
+  row.querySelector('.remove-store').addEventListener('click', () => {
+    row.remove();
+    // Renumber
+    c.querySelectorAll('.store-row-num').forEach((n, i) => { n.textContent = i + 1; });
+  });
+  c.appendChild(row);
+}
+
+function readStoresUI(containerId) {
+  const c = document.getElementById(containerId);
+  return Array.from(c.querySelectorAll('.store-row')).map(row => ({
+    name:    row.querySelector('.sr-name').value.trim(),
+    icon:    row.querySelector('.sr-icon').value.trim(),
+    sub:     row.querySelector('.sr-sub').value.trim(),
+    url:     row.querySelector('.sr-url').value.trim(),
+    topPick: row.querySelector('.sr-top').checked
+  }));
+}
+
+// ─────────────────────────────────────────────────────
+//  SEED DATA
+// ─────────────────────────────────────────────────────
+const SEED_CATEGORIES = [
+  { id:"mens",        label:"Men's Wear",    emoji:"👔", sortOrder:10 },
+  { id:"womens",      label:"Women's Wear",  emoji:"👗", sortOrder:20 },
+  { id:"kids",        label:"Kids",          emoji:"🧒", sortOrder:30 },
+  { id:"footwear",    label:"Footwear",      emoji:"👟", sortOrder:40 },
+  { id:"accessories", label:"Accessories",   emoji:"👜", sortOrder:50 },
+  { id:"activewear",  label:"Activewear",    emoji:"🏋️", sortOrder:60 },
+];
+
+const SEED_CARDS = [
+  { id:"mens-shirts",      cat:"mens",       emoji:"👔", badge:"top", badgeLabel:"Editor's Pick", sortOrder:10, title:"Best Formal Shirts for Men",      desc:"Crisp Oxford weaves, slim-cut dress shirts, and versatile solids that take you from boardroom to dinner.", stores:[{name:"Myntra",icon:"🛒",sub:"Huge collection, fast delivery",url:"https://www.myntra.com/shirts?gender=men&filter=formal",topPick:true},{name:"Ajio",icon:"🧵",sub:"Great Indian & global brands",url:"https://www.ajio.com/men-shirts/c/830215002",topPick:false},{name:"Amazon Fashion",icon:"📦",sub:"Best deals & Prime shipping",url:"https://www.amazon.in/s?k=men+formal+shirts&rh=n%3A1968024031",topPick:false}] },
+  { id:"mens-jeans",       cat:"mens",       emoji:"👖", badge:"hot", badgeLabel:"Trending",       sortOrder:20, title:"Men's Slim & Regular Jeans",       desc:"From raw denim to stretch comfort fits — these links take you straight to the denim section.",              stores:[{name:"Levi's India",icon:"🔵",sub:"Iconic fits, official store",url:"https://www.levi.in/c/mens/bottoms/jeans",topPick:true},{name:"Flipkart Fashion",icon:"🛍️",sub:"Budget-friendly picks",url:"https://www.flipkart.com/mens-jeans/pr?sid=2oq%2Ca5X",topPick:false},{name:"Myntra",icon:"🛒",sub:"Widest range online",url:"https://www.myntra.com/jeans?gender=men",topPick:false}] },
+  { id:"womens-dresses",   cat:"womens",     emoji:"👗", badge:"new", badgeLabel:"New Arrivals",   sortOrder:30, title:"Women's Casual & Party Dresses",   desc:"Midi, maxi, bodycon, and wrap styles filtered by occasion — brunch or night out.",                       stores:[{name:"Nykaa Fashion",icon:"💄",sub:"Trendy, women-focused store",url:"https://www.nykaafashion.com/women/clothing/dresses",topPick:true},{name:"Myntra",icon:"🛒",sub:"Massive women's collection",url:"https://www.myntra.com/dresses",topPick:false},{name:"H&M India",icon:"🌍",sub:"Affordable international style",url:"https://www2.hm.com/en_in/women/clothing/dresses.html",topPick:false}] },
+  { id:"womens-tops",      cat:"womens",     emoji:"👚", badge:"top", badgeLabel:"Editor's Pick", sortOrder:40, title:"Women's Tops, Blouses & Kurtis",  desc:"Everyday essentials and fusion wear — from linen blouses to printed kurtis.",                             stores:[{name:"W for Woman",icon:"🌸",sub:"India's top ethnic brand",url:"https://www.wforwoman.com/collections/tops",topPick:true},{name:"Ajio",icon:"🧵",sub:"Fusion & western tops",url:"https://www.ajio.com/women-tops/c/830215003",topPick:false},{name:"Meesho",icon:"💰",sub:"Budget ethnic & casual",url:"https://www.meesho.com/women-tops",topPick:false}] },
+  { id:"kids-clothing",    cat:"kids",       emoji:"🧒", badge:"new", badgeLabel:"New In",         sortOrder:50, title:"Kids' Everyday Clothing",          desc:"Durable, comfortable, and cute — filtered by age group and season for school and play.",                    stores:[{name:"FirstCry",icon:"🍼",sub:"India's #1 kids store",url:"https://www.firstcry.com/clothing/boys-and-girls",topPick:true},{name:"Myntra Kids",icon:"🛒",sub:"Top kids brands",url:"https://www.myntra.com/kids",topPick:false},{name:"H&M Kids",icon:"🌍",sub:"Affordable & stylish",url:"https://www2.hm.com/en_in/kids.html",topPick:false}] },
+  { id:"footwear-men",     cat:"footwear",   emoji:"👟", badge:"hot", badgeLabel:"Trending",       sortOrder:60, title:"Men's Sneakers & Casual Shoes",    desc:"From minimalist white sneakers to chunky runners — these links skip to the right shoe section.",           stores:[{name:"Puma India",icon:"🐆",sub:"Best sports & lifestyle",url:"https://in.puma.com/in/en/mens/shoes",topPick:true},{name:"Myntra Footwear",icon:"🛒",sub:"Every brand, one place",url:"https://www.myntra.com/mens-shoes",topPick:false},{name:"Flipkart",icon:"🛍️",sub:"Great value deals",url:"https://www.flipkart.com/mens-footwear/pr?sid=osp%2Ccil",topPick:false}] },
+  { id:"footwear-women",   cat:"footwear",   emoji:"👠", badge:"top", badgeLabel:"Editor's Pick", sortOrder:70, title:"Women's Heels, Flats & Sandals",  desc:"Elegant heels, everyday flats, and versatile sandals — filtered by occasion.",                            stores:[{name:"Tata CLiQ Fashion",icon:"💎",sub:"Premium women's footwear",url:"https://www.tatacliq.com/women/footwear",topPick:true},{name:"Nykaa Fashion",icon:"💄",sub:"Trendy heels & flats",url:"https://www.nykaafashion.com/women/footwear",topPick:false},{name:"Myntra",icon:"🛒",sub:"Best range at every price",url:"https://www.myntra.com/womens-footwear",topPick:false}] },
+  { id:"accessories-bags", cat:"accessories",emoji:"👜", badge:"top", badgeLabel:"Editor's Pick", sortOrder:80, title:"Women's Handbags & Totes",         desc:"From structured office totes to relaxed weekend bags — sorted by top rated.",                              stores:[{name:"Lavie World",icon:"👛",sub:"India's top handbag brand",url:"https://lavieworld.com/collections/handbags",topPick:true},{name:"Myntra Bags",icon:"🛒",sub:"All brands, easy filter",url:"https://www.myntra.com/bags-wallets-belts?gender=women&subcategory=Handbags",topPick:false},{name:"Amazon",icon:"📦",sub:"Wide range, fast delivery",url:"https://www.amazon.in/s?k=women+handbags&rh=n%3A1953605031",topPick:false}] },
+  { id:"activewear-men",   cat:"activewear", emoji:"🏋️", badge:"hot", badgeLabel:"Trending",       sortOrder:90, title:"Men's Gym & Sports Wear",          desc:"Performance tees, compression tights, and training shorts — filtered to activewear sections.",               stores:[{name:"Decathlon India",icon:"⚽",sub:"Best value sports gear",url:"https://www.decathlon.in/p/men-clothing",topPick:true},{name:"Puma India",icon:"🐆",sub:"Premium sports lifestyle",url:"https://in.puma.com/in/en/mens/clothing",topPick:false},{name:"Myntra Sport",icon:"🛒",sub:"Multiple brands, one filter",url:"https://www.myntra.com/sportswear?gender=men",topPick:false}] },
+  { id:"activewear-women", cat:"activewear", emoji:"🧘", badge:"new", badgeLabel:"New In",         sortOrder:100,title:"Women's Yoga & Workout Wear",       desc:"Breathable leggings, sports bras, and athleisure tops — pre-filtered to women's activewear.",                stores:[{name:"Decathlon",icon:"⚽",sub:"Top quality, best price",url:"https://www.decathlon.in/p/women-clothing",topPick:true},{name:"Nykaa Fashion",icon:"💄",sub:"Stylish activewear",url:"https://www.nykaafashion.com/women/activewear",topPick:false},{name:"Ajio",icon:"🧵",sub:"Trendy athleisure picks",url:"https://www.ajio.com/women-activewear/c/830215010",topPick:false}] },
+];
+
+const SEED_TOP_PICKS = SEED_CARDS.map((c, i) => {
+  const topStore = c.stores.find(s => s.topPick);
+  return { cat: {mens:"Men's Wear",womens:"Women's Wear",kids:"Kids' Fashion",footwear:"Footwear",accessories:"Accessories",activewear:"Activewear"}[c.cat], emoji: c.emoji, title: c.title, desc: c.desc, sortOrder: c.sortOrder, store: { name:topStore.name, icon:topStore.icon, sub:topStore.sub, url:topStore.url } };
+});
+
+const SEED_TRENDING = [
+  { name:"Men's Slim Jeans",    emoji:"👖", url:"https://www.levi.in/c/mens/bottoms/jeans",             meta:"Levi's · Myntra · Flipkart",    rank:1, changeDir:"up",   changeVal:"34%" },
+  { name:"Men's Sneakers",      emoji:"👟", url:"https://in.puma.com/in/en/mens/shoes",                  meta:"Puma · Myntra · Flipkart",      rank:2, changeDir:"up",   changeVal:"21%" },
+  { name:"Women's Dresses",     emoji:"👗", url:"https://www.nykaafashion.com/women/clothing/dresses",   meta:"Nykaa · Myntra · H&M",          rank:3, changeDir:"up",   changeVal:"18%" },
+  { name:"Women's Activewear",  emoji:"🧘", url:"https://www.decathlon.in/p/women-clothing",             meta:"Decathlon · Nykaa · Ajio",      rank:4, changeDir:"new",  changeVal:""   },
+  { name:"Women's Handbags",    emoji:"👜", url:"https://lavieworld.com/collections/handbags",           meta:"Lavie · Myntra · Amazon",       rank:5, changeDir:"down", changeVal:"5%" },
+  { name:"Kids' Clothing",      emoji:"🧒", url:"https://www.firstcry.com/clothing/boys-and-girls",      meta:"FirstCry · Myntra · H&M",       rank:6, changeDir:"up",   changeVal:"9%" },
+];
+
+const SEED_HEAT = [
+  { name:"Men's Wear",   emoji:"👔", activity:88, barColor:"var(--gold)"  },
+  { name:"Women's Wear", emoji:"👗", activity:74, barColor:"var(--gold)"  },
+  { name:"Footwear",     emoji:"👟", activity:65, barColor:"var(--gold)"  },
+  { name:"Activewear",   emoji:"🏋️", activity:58, barColor:"var(--blue)"  },
+  { name:"Kids",         emoji:"🧒", activity:42, barColor:"var(--gold)"  },
+  { name:"Accessories",  emoji:"👜", activity:36, barColor:"var(--red)"   },
+];
+
+const SEED_SPOTLIGHT = {
+  title: "Men's <em>Slim Jeans</em> are everywhere",
+  desc:  "Raw denim, stretch fits, and washed styles are dominating searches today. These pre-filtered links drop you right in the denim aisle.",
+  stores:[
+    { name:"Levi's India", icon:"🔵", sub:"Iconic fits, official store",  url:"https://www.levi.in/c/mens/bottoms/jeans",    topPick:true  },
+    { name:"Myntra",       icon:"🛒", sub:"Widest range online",           url:"https://www.myntra.com/jeans?gender=men",     topPick:false }
+  ]
+};
+
+function seedLog(msg) {
+  const el = document.getElementById('seed-log');
+  el.style.display = 'block';
+  el.innerHTML += `<div>${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+async function seedCategories() {
+  seedLog('🏷️ Seeding categories…');
+  for (const c of SEED_CATEGORIES) {
+    await set(ref(db, `categories/${c.id}`), c);
+    seedLog(`  ✓ ${c.emoji} ${c.label}`);
+  }
+  seedLog('✅ Categories done.');
+}
+
+async function seedCards() {
+  seedLog('🃏 Seeding cards…');
+  const writes = SEED_CARDS.map(async c => {
+    const padded = String(c.sortOrder).padStart(5, '0');
+    await set(ref(db, `cards/${c.id}`), { ...c, catSort: `${c.cat}_${padded}` });
+    seedLog(`  ✓ ${c.title}`);
+  });
+  await Promise.all(writes);
+  seedLog('✅ Cards done.');
+}
+
+async function seedTrending() {
+  seedLog('🔥 Seeding trending…');
+  await set(ref(db, 'trending'), null); // clear
+  for (const t of SEED_TRENDING) {
+    await push(ref(db, 'trending'), t);
+    seedLog(`  ✓ #${t.rank} ${t.name}`);
+  }
+  seedLog('✅ Trending done.');
+}
+
+async function seedPicks() {
+  seedLog('⭐ Seeding top picks…');
+  await set(ref(db, 'topPicks'), null);
+  for (const p of SEED_TOP_PICKS) {
+    await push(ref(db, 'topPicks'), p);
+    seedLog(`  ✓ ${p.title}`);
+  }
+  seedLog('✅ Top Picks done.');
+}
+
+async function seedMisc() {
+  seedLog('💡 Seeding spotlight…');
+  await set(ref(db, 'spotlight'), SEED_SPOTLIGHT);
+  seedLog('✓ Spotlight saved.');
+
+  seedLog('🌡️ Seeding heat categories…');
+  await set(ref(db, 'heatCategories'), null);
+  for (const h of SEED_HEAT) {
+    await push(ref(db, 'heatCategories'), h);
+    seedLog(`  ✓ ${h.name}`);
+  }
+  seedLog('✅ Misc done.');
+}
+
+document.getElementById('seed-all-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  seedLog('🌱 Starting full seed…');
+  await seedCategories();
+  await seedCards();
+  await seedTrending();
+  await seedPicks();
+  await seedMisc();
+  seedLog('🎉 All data seeded!');
+  toast('All data seeded ✓');
+  loadDashboard();
+});
+document.getElementById('seed-cats-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  await seedCategories(); toast('Categories seeded ✓'); loadDashboard(); loadCategories();
+});
+document.getElementById('seed-cards-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  await seedCards(); toast('Cards seeded ✓'); loadDashboard();
+});
+document.getElementById('seed-trending-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  await seedTrending(); toast('Trending seeded ✓'); loadDashboard();
+});
+document.getElementById('seed-picks-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  await seedPicks(); toast('Top Picks seeded ✓'); loadDashboard();
+});
+document.getElementById('seed-misc-btn').addEventListener('click', async () => {
+  document.getElementById('seed-log').innerHTML = '';
+  await seedMisc(); toast('Spotlight & Heat seeded ✓'); loadDashboard();
+});
+</script>
+</body>
+</html>

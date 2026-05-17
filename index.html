@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Lowoncost</title>
+  <link rel="stylesheet" href="style.css" />
+  
+</head>
+
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="logo-text">Lowon<span>Cost</span></div>
+    <div class="nav-right">
+      <div class="nav-badge">Live Deals</div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">✦ Curated Picks</div>
+      <h1>Shop <em>Smarter</em>,<br />Not Harder</h1>
+      <p class="hero-sub">Pre-filtered links to the best fashion stores. Every click lands you in the right section.</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-cats">–</div>
+        <div class="stat-label">Categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-stores">–</div>
+        <div class="stat-label">Stores</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">★ 1</div>
+        <div class="stat-label">Top Pick</div>
+      </div>
+    </div>
+
+    <!-- CHIPS -->
+    <div class="chips-wrap">
+      <div class="chips" id="chips">
+        <div class="chip active" data-cat="all"><span class="chip-icon">✦</span> All</div>
+        <div class="chip" data-cat="mens"><span class="chip-icon">👔</span> Men's</div>
+        <div class="chip" data-cat="womens"><span class="chip-icon">👗</span> Women's</div>
+        <div class="chip" data-cat="kids"><span class="chip-icon">🧒</span> Kids</div>
+        <div class="chip" data-cat="footwear"><span class="chip-icon">👟</span> Footwear</div>
+        <div class="chip" data-cat="accessories"><span class="chip-icon">👜</span> Accessories</div>
+        <div class="chip" data-cat="activewear"><span class="chip-icon">🏋️</span> Activewear</div>
+      </div>
+    </div>
+
+    <!-- CARDS MOUNT -->
+    <div id="cards-root"></div>
+
+    <!-- INFINITE SCROLL SENTINEL -->
+    <div class="load-sentinel" id="load-sentinel"></div>
+    <div class="load-more-spinner" id="load-spinner" style="display:none">
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+      Loading more…
+    </div>
+
+    <!-- ABOUT -->
+    <div class="about-panel">
+      <h2>Why Trust <span>LowonCost</span>?</h2>
+      <p>We manually research each category and handpick stores with strong return policies, genuine reviews, and
+        competitive pricing. Our <strong style="color:var(--gold)">★ Top Pick</strong> goes to the best store — not the
+        highest-paying one.</p>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="hiw-section">
+      <h2>How <span>It Works</span></h2>
+      <div class="hiw-grid">
+        <div class="hiw-card">
+          <div class="hiw-num">01</div>
+          <h3>Pick a Category</h3>
+          <p>Men, women, kids, shoes, accessories — all organised clearly.</p>
+        </div>
+        <div class="hiw-card">
+          <div class="hiw-num">02</div>
+          <h3>Pre-Filtered Links</h3>
+          <p>Land directly in the right section — no hunting needed.</p>
+        </div>
+        <div class="hiw-card">
+          <div class="hiw-num">03</div>
+          <h3>Top Pick Badge</h3>
+          <p>One ★ Top Pick per card — the best overall option for value.</p>
+        </div>
+        <div class="hiw-card">
+          <div class="hiw-num">04</div>
+          <h3>Affiliate Links</h3>
+          <p>We earn a small commission — at no extra cost to you.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCLOSURE -->
+    <div class="disclosure">
+      <p><strong>Affiliate Disclosure:</strong> LowonCost participates in affiliate marketing programs. We may earn a
+        commission when you click a link and make a purchase — at no extra cost to you. Our Top Pick selections are
+        editorially independent.</p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="main-footer">
+      <strong>Lowon<span>Cost</span></strong><br />
+      © 2025 LowonCost · All store links are affiliate links.<br />
+      Prices and availability subject to change.
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a class="bottom-tab active" href="index.html">
+        <div class="bottom-tab-icon">🏠</div>
+        <div class="bottom-tab-label">Home</div>
+      </a>
+      <a class="bottom-tab" href="trending.html">
+        <div class="bottom-tab-icon">🔥</div>
+        <div class="bottom-tab-label">Trending</div>
+      </a>
+      <a class="bottom-tab" href="toppicks.html">
+        <div class="bottom-tab-icon">⭐</div>
+        <div class="bottom-tab-label">Top Picks</div>
+      </a>
+      <a class="bottom-tab" href="history.html">
+        <div class="bottom-tab-icon">🕐</div>
+        <div class="bottom-tab-label">History</div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- BOTTOM SHEET POPUP -->
+  <div id="overlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body">
+        <div class="sheet-icon">🛍️</div>
+        <div class="sheet-title">Visiting Store</div>
+        <div class="sheet-store" id="sheet-store-name">–</div>
+        <p class="sheet-note">We've pre-filtered the page for you. You'll land directly in the right section.</p>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="sheet-progress"></div>
+        </div>
+        <p class="sheet-disclaimer">⚡ Affiliate link — StyleVault may earn a commission at no extra cost to you.</p>
+        <button class="btn-go" id="btn-go">Continue to Store →</button>
+        <button class="btn-back" id="btn-back">Go back</button>
+      </div>
+    </div>
+  </div>
+  <!-- <script rel="preload" src="firebase-config.js"></script> -->
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, query, orderByChild, equalTo, limitToFirst, startAfter, get }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // ── Load config ──────────────────────────────────────
+    // firebase-config.js must be loaded first as a regular script
+    const cfg = window.FIREBASE_CONFIG;
+    const PAGE = window.PAGE_SIZE || 4;
+
+    const app = initializeApp(cfg);
+    const db = getDatabase(app);
+
+    // ── State ─────────────────────────────────────────────
+    let activeFilter = 'all';
+    let lastKey = null;   // last card key for cursor-based pagination
+    let loading = false;
+    let exhausted = false;  // no more items to load
+    let allCards = [];     // in-memory cache per filter session
+
+    const CAT_ORDER = ['mens', 'womens', 'kids', 'footwear', 'accessories', 'activewear'];
+    const CAT_LABELS = {
+      mens: "Men's Wear", womens: "Women's Wear", kids: "Kids' Fashion",
+      footwear: "Footwear", accessories: "Accessories", activewear: "Activewear"
+    };
+
+    // ── Visited (localStorage) ────────────────────────────
+    function getVisited() {
+      try { return JSON.parse(localStorage.getItem('sv_visited') || '{}'); } catch { return {}; }
+    }
+    function markVisited(key) {
+      const v = getVisited(); v[key] = true;
+      localStorage.setItem('sv_visited', JSON.stringify(v));
+    }
+
+    // ── Skeleton loader ───────────────────────────────────
+    function showSkeletons(n = 2) {
+      const root = document.getElementById('cards-root');
+      for (let i = 0; i < n; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'card-skeleton skeleton-card-anim';
+        sk.innerHTML = `
+        <div class="card-skeleton-header">
+          <div class="skeleton sk-emoji"></div>
+          <div class="sk-lines">
+            <div class="skeleton sk-line w60"></div>
+            <div class="skeleton sk-line w40"></div>
+          </div>
+        </div>
+        <div class="card-skeleton-body">
+          <div class="skeleton sk-store"></div>
+          <div class="skeleton sk-store"></div>
+        </div>`;
+        root.appendChild(sk);
+      }
+    }
+    function clearSkeletons() {
+      document.querySelectorAll('.card-skeleton').forEach(el => el.remove());
+    }
+
+    // ── Fetch a page of cards from Firebase ───────────────
+    async function fetchPage(filter, afterKey = null) {
+      // Build query
+      let q;
+      const cardsRef = ref(db, 'cards');
+
+      if (filter === 'all') {
+        // Order by sortOrder field for consistent pagination across all cats
+        q = afterKey
+          ? query(cardsRef, orderByChild('sortOrder'), startAfter(afterKey), limitToFirst(PAGE))
+          : query(cardsRef, orderByChild('sortOrder'), limitToFirst(PAGE));
+      } else {
+        // Filter by category; use 'catOrder' composite key: "cat_sortOrder"
+        // We query orderByChild('cat') + equalTo but Firebase RTDB can't paginate
+        // within an equalTo easily, so we use a composite key: catSort = "mens_001"
+        q = afterKey
+          ? query(cardsRef, orderByChild('catSort'), startAfter(afterKey), limitToFirst(PAGE))
+          : query(cardsRef, orderByChild('catSort'), startAfter(`${filter}_`), limitToFirst(PAGE));
+      }
+
+      const snap = await get(q);
+      if (!snap.exists()) return [];
+
+      const results = [];
+      snap.forEach(child => {
+        const card = { _key: child.key, ...child.val() };
+        // For category filter, only include cards whose cat matches
+        if (filter !== 'all' && card.cat !== filter) return;
+        results.push(card);
+      });
+      return results;
+    }
+
+    // ── Render a single card element ──────────────────────
+    function buildCardEl(card) {
+      const visited = getVisited();
+      const topStore = (card.stores || []).find(s => s.topPick);
+      const badgeCls = card.badge === 'top' ? 'badge-top' : card.badge === 'hot' ? 'badge-hot' : 'badge-new';
+
+      const storesHTML = (card.stores || []).map(s => {
+        const key = `${card.id}_${s.name}`;
+        const wasVisited = visited[key];
+        return `<a class="store-btn ${s.topPick ? 'is-top' : ''}" href="#"
+          data-url="${s.url}" data-store="${s.name}" data-key="${key}">
+        <div class="store-left">
+          <div class="store-icon">${s.icon}</div>
+          <div>
+            <div class="store-name">
+              ${s.name}
+              ${s.topPick ? '<span class="top-star">★</span>' : ''}
+              ${wasVisited ? '<span class="visited-tag">Visited</span>' : ''}
+            </div>
+            <div class="store-sub">${s.sub}</div>
+          </div>
+        </div>
+        <div class="store-arrow">›</div>
+      </a>`;
+      }).join('');
+
+      const topBanner = topStore
+        ? `<div class="top-pick-bar">★ Top Pick: <strong>${topStore.name}</strong> — Best for this category</div>`
+        : '';
+
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.dataset.cardId = card.id || card._key;
+      el.innerHTML = `
+      <div class="card-header">
+        <div class="card-emoji-wrap">${card.emoji || '🛍️'}</div>
+        <div class="card-header-info">
+          <div class="card-title">${card.title}</div>
+          <div class="badges-row"><span class="badge ${badgeCls}">${card.badgeLabel}</span></div>
+        </div>
+      </div>
+      <div class="card-desc">${card.desc}</div>
+      ${topBanner}
+      <div class="stores">${storesHTML}</div>`;
+      return el;
+    }
+
+    // ── Append cards into correct category section ─────────
+    function appendCards(cards) {
+      const root = document.getElementById('cards-root');
+
+      cards.forEach((card, i) => {
+        const cat = card.cat;
+        let section = root.querySelector(`[data-section="${cat}"]`);
+
+        if (!section) {
+          // Add divider if sections already exist
+          const existing = root.querySelectorAll('[data-section]');
+          if (existing.length > 0) {
+            const div = document.createElement('div');
+            div.className = 'cat-divider';
+            root.appendChild(div);
+          }
+
+          section = document.createElement('div');
+          section.dataset.section = cat;
+
+          const lbl = document.createElement('div');
+          lbl.className = 'section-label';
+          lbl.dataset.labelFor = cat;
+          lbl.innerHTML = `<h2>${CAT_LABELS[cat] || cat}</h2><span id="count-${cat}">0 picks</span>`;
+          root.appendChild(lbl);
+          root.appendChild(section);
+        }
+
+        const list = section.querySelector('.cards-list') || (() => {
+          const l = document.createElement('div');
+          l.className = 'cards-list';
+          section.appendChild(l);
+          return l;
+        })();
+
+        const el = buildCardEl(card);
+        el.style.animationDelay = `${Math.min(i, 4) * 0.05}s`;
+        list.appendChild(el);
+
+        // Update count badge
+        const countEl = root.querySelector(`#count-${cat}`);
+        if (countEl) {
+          const n = list.querySelectorAll('.card').length;
+          countEl.textContent = `${n} pick${n !== 1 ? 's' : ''}`;
+        }
+      });
+
+      // Re-bind store buttons
+      bindStoreButtons(root);
+    }
+
+    // ── Bind store click → sheet ──────────────────────────
+    function bindStoreButtons(root) {
+      root.querySelectorAll('.store-btn').forEach(btn => {
+        // Avoid double-binding
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          openSheet(btn.dataset.store, btn.dataset.url, btn.dataset.key);
+        });
+      });
+    }
+
+    // ── Load next page ────────────────────────────────────
+    async function loadMore() {
+      if (loading || exhausted) return;
+      loading = true;
+      document.getElementById('load-spinner').style.display = 'flex';
+
+      try {
+        const cards = await fetchPage(activeFilter, lastKey);
+        clearSkeletons();
+
+        if (cards.length === 0) {
+          exhausted = true;
+        } else {
+          allCards = allCards.concat(cards);
+          appendCards(cards);
+          // Cursor: use composite sort key of last card
+          const last = cards[cards.length - 1];
+          lastKey = activeFilter === 'all'
+            ? (last.sortOrder ?? last._key)
+            : (last.catSort ?? `${last.cat}_${last.sortOrder ?? last._key}`);
+          if (cards.length < PAGE) exhausted = true;
+        }
+
+        updateStats();
+      } catch (err) {
+        console.error('Firebase fetch error:', err);
+        clearSkeletons();
+        const root = document.getElementById('cards-root');
+        if (!root.querySelector('.card')) {
+          root.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <div class="empty-title">Couldn't load data</div>
+          <div class="empty-desc">Check your Firebase config or internet connection.</div>
+        </div>`;
+        }
+      } finally {
+        loading = false;
+        document.getElementById('load-spinner').style.display = 'none';
+      }
+    }
+
+    // ── Update header stats ───────────────────────────────
+    function updateStats() {
+      const cats = new Set(allCards.map(c => c.cat)).size;
+      const stores = allCards.reduce((n, c) => n + (c.stores || []).length, 0);
+      document.getElementById('stat-cats').textContent = cats || '–';
+      document.getElementById('stat-stores').textContent = stores || '–';
+    }
+
+    // ── Reset & re-load for a new filter ─────────────────
+    async function resetAndLoad(filter) {
+      activeFilter = filter;
+      lastKey = null;
+      exhausted = false;
+      allCards = [];
+
+      const root = document.getElementById('cards-root');
+      root.innerHTML = '';
+      showSkeletons(3);
+      await loadMore();
+    }
+
+    // ── Infinite scroll (IntersectionObserver) ────────────
+    const sentinel = document.getElementById('load-sentinel');
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+
+    // ── Chips ─────────────────────────────────────────────
+    document.getElementById('chips').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      resetAndLoad(chip.dataset.cat);
+      document.getElementById('cards-root').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // ── Sheet ─────────────────────────────────────────────
+    let pendingUrl = null;
+
+    function openSheet(storeName, url, key) {
+      pendingUrl = url;
+      document.getElementById('sheet-store-name').textContent = storeName;
+      document.getElementById('overlay').classList.add('open');
+      const bar = document.getElementById('sheet-progress');
+      bar.style.width = '0%';
+      requestAnimationFrame(() => { bar.style.width = '100%'; });
+      if (key) markVisited(key);
+    }
+
+    function closeSheet() {
+      document.getElementById('overlay').classList.remove('open');
+      pendingUrl = null;
+      const bar = document.getElementById('sheet-progress');
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.transition = 'width 3s linear'; }, 50);
+    }
+
+    document.getElementById('btn-go').addEventListener('click', () => {
+      if (pendingUrl) window.open(pendingUrl, '_blank', 'noopener');
+      closeSheet();
+      // Refresh visited tags
+      document.querySelectorAll('.store-btn').forEach(btn => {
+        const v = getVisited();
+        if (v[btn.dataset.key]) {
+          const nameEl = btn.querySelector('.store-name');
+          if (nameEl && !nameEl.querySelector('.visited-tag')) {
+            const tag = document.createElement('span');
+            tag.className = 'visited-tag';
+            tag.textContent = 'Visited';
+            nameEl.appendChild(tag);
+          }
+        }
+      });
+    });
+    document.getElementById('btn-back').addEventListener('click', closeSheet);
+    document.getElementById('overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('overlay')) closeSheet();
+    });
+
+    // ── Initial load ──────────────────────────────────────
+    showSkeletons(3);
+    loadMore();
+  </script>
+
+  <!-- Config must load BEFORE the module above uses window.FIREBASE_CONFIG -->
+  <script src="firebase-config.js"></script>
+</body>
+
+</html>

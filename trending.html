@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Trending — Lowoncost</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .trend-hero { padding: 28px 20px 16px; }
+    .trend-hero h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 8px; }
+    .trend-hero h1 em { font-style: normal; color: var(--gold); }
+    .trend-hero p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(224,92,92,0.1); border: 1px solid rgba(224,92,92,0.3);
+      color: var(--red); font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .live-dot { width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1.4s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)} }
+
+    .trend-section { padding: 0 20px; margin-bottom: 28px; }
+    .trend-section-title { font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px; }
+
+    .trend-list { display:flex;flex-direction:column;gap:10px; }
+
+    .trend-item {
+      display:flex;align-items:center;gap:14px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:14px;
+      cursor:pointer;text-decoration:none;transition:opacity .15s;color:inherit;
+    }
+    .trend-item:active{opacity:.7}
+    .trend-item.is-gold{border-color:var(--border-gold)}
+
+    .trend-rank { font-size:1.1rem;font-weight:800;color:var(--muted);width:24px;text-align:center;flex-shrink:0;line-height:1; }
+    .trend-item:nth-child(1) .trend-rank{color:var(--gold)}
+    .trend-item:nth-child(2) .trend-rank{color:#c0c0c0}
+    .trend-item:nth-child(3) .trend-rank{color:#cd7f32}
+
+    .trend-emoji{font-size:1.6rem;flex-shrink:0}
+    .trend-info{flex:1;min-width:0}
+    .trend-name{font-size:.9rem;font-weight:600;margin-bottom:3px}
+    .trend-meta{font-size:.72rem;color:var(--muted)}
+
+    .trend-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+    .trend-change{font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:10px}
+    .trend-change.up{color:#5ce05c;background:rgba(92,224,92,.1)}
+    .trend-change.down{color:var(--red);background:rgba(224,92,92,.1)}
+    .trend-change.new{color:var(--blue);background:rgba(92,184,224,.1)}
+    .trend-arrow{color:var(--muted);font-size:.9rem}
+
+    .spotlight {
+      margin: 0 20px 28px;
+      background:var(--surface);border:1px solid var(--border-gold);
+      border-radius:var(--radius);overflow:hidden;
+    }
+    .spotlight-header { background:var(--surface2);padding:14px 18px;display:flex;align-items:center;justify-content:space-between; }
+    .spotlight-label  { font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold); }
+    .spotlight-body   { padding:18px; }
+    .spotlight-body h2 { font-size:1.1rem;font-weight:700;margin-bottom:6px;line-height:1.3; }
+    .spotlight-body h2 em { font-style:normal;color:var(--gold); }
+    .spotlight-body p  { font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:14px; }
+    .spotlight-stores  { display:flex;flex-direction:column;gap:8px; }
+
+    .heat-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+    .heat-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 14px;cursor:pointer;text-decoration:none;transition:opacity .15s;color:inherit; }
+    .heat-card:active{opacity:.7}
+    .heat-emoji{font-size:1.6rem;margin-bottom:8px}
+    .heat-name{font-size:.85rem;font-weight:700;margin-bottom:4px}
+    .heat-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin-bottom:6px;overflow:hidden}
+    .heat-bar{height:100%;background:var(--gold);border-radius:2px}
+    .heat-pct{font-size:.68rem;color:var(--muted)}
+
+    /* skeleton */
+    .trend-skeleton { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:14px; }
+    .sk-rank  { width:24px;height:20px; }
+    .sk-emoji2{ width:36px;height:36px;border-radius:8px;flex-shrink:0; }
+    .sk-info  { flex:1;display:flex;flex-direction:column;gap:8px; }
+    .sk-ln    { height:10px;border-radius:4px; }
+    .sk-ln.w70{ width:70%; }
+    .sk-ln.w45{ width:45%; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="logo-text">Lowon<span>Cost</span></div>
+  <div class="nav-right"><div class="nav-badge">Live Deals</div></div>
+</nav>
+
+<main class="main">
+
+  <div class="trend-hero">
+    <div class="live-pill"><span class="live-dot"></span> Live Trends</div>
+    <h1>What's <em>Hot</em><br/>Right Now</h1>
+    <p>The most-clicked categories and stores on LowonCost today.</p>
+  </div>
+
+  <!-- Spotlight (loaded from Firebase) -->
+  <div id="spotlight-root"></div>
+
+  <!-- Top trending items (paginated) -->
+  <div class="trend-section">
+    <div class="trend-section-title">Top trending right now</div>
+    <div class="trend-list" id="trend-list"></div>
+  </div>
+
+  <!-- Category heat -->
+  <div class="trend-section">
+    <div class="trend-section-title">Category heat today</div>
+    <div class="heat-grid" id="heat-grid"></div>
+  </div>
+
+  <!-- Infinite scroll sentinel -->
+  <div class="load-sentinel" id="load-sentinel"></div>
+  <div class="load-more-spinner" id="load-spinner" style="display:none">
+    <div class="spinner-dot"></div><div class="spinner-dot"></div><div class="spinner-dot"></div>
+    Loading more…
+  </div>
+
+  <div class="main-footer">
+    <strong>Lowon<span>Cost</span></strong><br/>
+    © 2025 LowonCost · Trend data is illustrative.<br/>
+    Affiliate links — we may earn a commission.
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a class="bottom-tab" href="index.html"><div class="bottom-tab-icon">🏠</div><div class="bottom-tab-label">Home</div></a>
+    <a class="bottom-tab active" href="trending.html"><div class="bottom-tab-icon">🔥</div><div class="bottom-tab-label">Trending</div></a>
+    <a class="bottom-tab" href="toppicks.html"><div class="bottom-tab-icon">⭐</div><div class="bottom-tab-label">Top Picks</div></a>
+    <a class="bottom-tab" href="history.html"><div class="bottom-tab-icon">🕐</div><div class="bottom-tab-label">History</div></a>
+  </div>
+</nav>
+
+<script src="firebase-config.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, query, orderByChild, limitToFirst, startAfter, get, child }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const app = initializeApp(window.FIREBASE_CONFIG);
+  const db  = getDatabase(app);
+  const PAGE = window.PAGE_SIZE || 4;
+
+  let lastRank  = null;
+  let loading   = false;
+  let exhausted = false;
+
+  // ── Skeleton loaders ──
+  function showSkeletons(n = 3) {
+    const list = document.getElementById('trend-list');
+    for (let i = 0; i < n; i++) {
+      const sk = document.createElement('div');
+      sk.className = 'trend-skeleton skeleton-item';
+      sk.innerHTML = `
+        <div class="skeleton sk-rank"></div>
+        <div class="skeleton sk-emoji2"></div>
+        <div class="sk-info">
+          <div class="skeleton sk-ln w70"></div>
+          <div class="skeleton sk-ln w45"></div>
+        </div>`;
+      list.appendChild(sk);
+    }
+  }
+  function clearSkeletons() {
+    document.querySelectorAll('.skeleton-item').forEach(el => el.remove());
+  }
+
+  // ── Load spotlight ──
+  async function loadSpotlight() {
+    try {
+      const snap = await get(ref(db, 'spotlight'));
+      if (!snap.exists()) return;
+      const s = snap.val();
+      const storesHTML = (s.stores || []).map(st =>
+        `<a class="store-btn ${st.topPick ? 'is-top' : ''}" href="${st.url}" target="_blank" rel="noopener">
+          <div class="store-left">
+            <div class="store-icon">${st.icon}</div>
+            <div>
+              <div class="store-name">${st.name}${st.topPick ? ' <span class="top-star">★</span>' : ''}</div>
+              <div class="store-sub">${st.sub}</div>
+            </div>
+          </div>
+          <div class="store-arrow">›</div>
+        </a>`).join('');
+
+      document.getElementById('spotlight-root').innerHTML = `
+        <div class="spotlight">
+          <div class="spotlight-header">
+            <span class="spotlight-label">🔥 Spotlight of the Day</span>
+            <span class="badge badge-hot">Trending</span>
+          </div>
+          <div class="spotlight-body">
+            <h2>${s.title || ''}</h2>
+            <p>${s.desc || ''}</p>
+            <div class="spotlight-stores">${storesHTML}</div>
+          </div>
+        </div>`;
+    } catch (e) { console.error('Spotlight load error:', e); }
+  }
+
+  // ── Load heat grid ──
+  async function loadHeatGrid() {
+    try {
+      const snap = await get(query(ref(db, 'heatCategories'), orderByChild('activity')));
+      if (!snap.exists()) return;
+      const items = [];
+      snap.forEach(c => items.unshift({ _key: c.key, ...c.val() })); // descending
+      const grid = document.getElementById('heat-grid');
+      grid.innerHTML = '';
+      items.forEach(h => {
+        const el = document.createElement('a');
+        el.className = 'heat-card';
+        el.href = 'stylevault.html';
+        el.style.textDecoration = 'none';
+        el.style.color = 'inherit';
+        const barColor = h.barColor || 'var(--gold)';
+        el.innerHTML = `
+          <div class="heat-emoji">${h.emoji}</div>
+          <div class="heat-name">${h.name}</div>
+          <div class="heat-bar-wrap"><div class="heat-bar" style="width:${h.activity}%;background:${barColor}"></div></div>
+          <div class="heat-pct">${h.activity}% activity</div>`;
+        grid.appendChild(el);
+      });
+    } catch (e) { console.error('Heat grid error:', e); }
+  }
+
+  // ── Load trend items (paginated) ──
+  async function loadTrendItems() {
+    if (loading || exhausted) return;
+    loading = true;
+    document.getElementById('load-spinner').style.display = 'flex';
+
+    try {
+      const q = lastRank
+        ? query(ref(db, 'trending'), orderByChild('rank'), startAfter(lastRank), limitToFirst(PAGE))
+        : query(ref(db, 'trending'), orderByChild('rank'), limitToFirst(PAGE));
+
+      const snap = await get(q);
+      clearSkeletons();
+
+      if (!snap.exists()) { exhausted = true; return; }
+
+      const list = document.getElementById('trend-list');
+      let count = list.querySelectorAll('.trend-item').length;
+
+      snap.forEach(child => {
+        const t = { _key: child.key, ...child.val() };
+        count++;
+
+        const el = document.createElement('a');
+        el.className = `trend-item${count === 1 ? ' is-gold' : ''}`;
+        el.href = t.url || '#';
+        el.target = '_blank';
+        el.rel = 'noopener';
+
+        const changeClass = t.changeDir === 'up' ? 'up' : t.changeDir === 'down' ? 'down' : 'new';
+        const changeLabel = t.changeDir === 'new' ? 'New' : `${t.changeDir === 'up' ? '↑' : '↓'} ${t.changeVal || ''}`;
+
+        el.innerHTML = `
+          <div class="trend-rank">${count}</div>
+          <div class="trend-emoji">${t.emoji}</div>
+          <div class="trend-info">
+            <div class="trend-name">${t.name}</div>
+            <div class="trend-meta">${t.meta || ''}</div>
+          </div>
+          <div class="trend-right">
+            <span class="trend-change ${changeClass}">${changeLabel}</span>
+            <span class="trend-arrow">›</span>
+          </div>`;
+        list.appendChild(el);
+        lastRank = t.rank;
+      });
+
+      if (snap.size < PAGE) exhausted = true;
+    } catch (e) {
+      console.error('Trending load error:', e);
+      clearSkeletons();
+    } finally {
+      loading = false;
+      document.getElementById('load-spinner').style.display = 'none';
+    }
+  }
+
+  // ── Infinite scroll ──
+  const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) loadTrendItems();
+  }, { rootMargin: '200px' });
+  observer.observe(document.getElementById('load-sentinel'));
+
+  // ── Boot ──
+  showSkeletons(4);
+  loadSpotlight();
+  loadHeatGrid();
+  loadTrendItems();
+</script>
+</body>
+</html>
