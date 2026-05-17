@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Trending — Lowoncost</title>
+  <meta name="description" content="The most-clicked categories and stores on LowonCost today.">
+  <title>Trending — LowonCost</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="icon.webp" type="image/x-icon">
   <style>
     .trend-hero { padding: 28px 20px 16px; }
     .trend-hero h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 8px; }
@@ -210,7 +212,7 @@
       const snap = await get(query(ref(db, 'heatCategories'), orderByChild('activity')));
       if (!snap.exists()) return;
       const items = [];
-      snap.forEach(c => items.unshift({ _key: c.key, ...c.val() })); // descending
+      snap.forEach(c => { items.unshift({ _key: c.key, ...c.val() }); return false; }); // descending
       const grid = document.getElementById('heat-grid');
       grid.innerHTML = '';
       items.forEach(h => {
@@ -249,9 +251,11 @@
       const list = document.getElementById('trend-list');
       let count = list.querySelectorAll('.trend-item').length;
 
+      let fetched = 0;
       snap.forEach(child => {
         const t = { _key: child.key, ...child.val() };
         count++;
+        fetched++;
 
         const el = document.createElement('a');
         el.className = `trend-item${count === 1 ? ' is-gold' : ''}`;
@@ -275,9 +279,10 @@
           </div>`;
         list.appendChild(el);
         lastRank = t.rank;
+        return false; // prevent Firebase forEach early termination
       });
 
-      if (snap.size < PAGE) exhausted = true;
+      if (fetched < PAGE) exhausted = true;
     } catch (e) {
       console.error('Trending load error:', e);
       clearSkeletons();

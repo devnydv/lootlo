@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Top Picks — Lowoncost</title>
+  <title>Top Picks — lowoncost</title>
+  <meta name="description" content="One best store per fashion category — chosen for value, returns policy, and genuine selection. Not the highest bidder.">
   <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="icon.webp" type="image/x-icon">
   <style>
     .page-hero { padding: 28px 20px 20px; }
     .page-hero h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 8px; }
@@ -180,8 +182,10 @@
       if (!snap.exists()) { exhausted = true; return; }
 
       const root = document.getElementById('picks-root');
+      let fetched = 0;
       snap.forEach(child => {
         const p = { _key: child.key, ...child.val() };
+        fetched++;
 
         const el = document.createElement('div');
         el.className = 'pick-card';
@@ -210,6 +214,7 @@
           </div>`;
         root.appendChild(el);
         lastOrder = p.sortOrder ?? p._key;
+        return false; // prevent Firebase forEach early termination
       });
 
       // bind buttons
@@ -221,7 +226,7 @@
         });
       });
 
-      if (snap.size < PAGE) exhausted = true;
+      if (fetched < PAGE) exhausted = true;
     } catch (e) {
       console.error('Top Picks load error:', e);
       clearSkeletons();
