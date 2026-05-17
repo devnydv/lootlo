@@ -23,4 +23,4 @@ const PAGE_SIZE = 4;
 // ── ADMIN CONFIG ──────────────────────────────────────
 // Set a password for the admin panel (or use Firebase Auth rules)
 // IMPORTANT: For production use Firebase Auth instead of this plain password.
-window.ADMIN_PASSWORD = "stylevault2025";
+window.ADMIN_PASSWORD = "lowoncost123";
