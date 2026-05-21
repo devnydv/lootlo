@@ -584,6 +584,15 @@ body {
 .main-footer strong { font-weight: 800; }
 .main-footer strong span { color: var(--gold); }
 
+.main-footer a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.main-footer a:hover {
+  color: var(--gold);
+}
+
 /* ── LOAD MORE / SENTINEL ── */
 .load-sentinel {
   height: 1px;
