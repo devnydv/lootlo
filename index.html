@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>LootLo - Curated Fashion Deals</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .cost-indicator { font-size:.72rem; font-weight:700; letter-spacing:-.5px; color:var(--gold,#e8c97e); margin-right:2px; flex-shrink:0; white-space:nowrap; }
+    .cost-dim { opacity:.2; }
+  </style>
   <link rel="shortcut icon"  type="image/x-icon" href="icon.webp">
   <meta name="description"
     content="Discover the best fashion deals with LootLo. Our curated picks connect you to top stores with pre-filtered links, ensuring a smarter shopping experience. Shop confidently with our trusted recommendations and affiliate links." />
@@ -275,6 +279,8 @@
       const storesHTML = (card.stores || []).map(s => {
         const key = `${card.id}_${s.name}`;
         const wasVisited = visited[key];
+        const costLevel = Math.min(3, Math.max(1, parseInt(s.costLevel) || 2));
+        const rupeeHTML = `<span class="cost-indicator" title="Cost: ${costLevel === 1 ? 'Budget' : costLevel === 2 ? 'Mid-range' : 'Premium'}">${'₹'.repeat(costLevel)}<span class="cost-dim">${'₹'.repeat(3 - costLevel)}</span></span>`;
         return `<a class="store-btn ${s.topPick ? 'is-top' : ''}" href="#"
           data-url="${s.url}" data-store="${s.name}" data-key="${key}">
         <div class="store-left">
@@ -288,7 +294,8 @@
             <div class="store-sub">${s.sub}</div>
           </div>
         </div>
-        <div class="store-arrow">›</div>
+        
+        <div class="store-arrow">${rupeeHTML} ›</div>
       </a>`;
       }).join('');
 
