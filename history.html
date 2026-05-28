@@ -1,255 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>History — LootLo</title>
   <meta name="description" content="Every store you've visited through LootLo, saved locally on your device.">
-  <meta name="keywords" content="LootLo, browsing history, visited stores, store categories, revisit stores, clear history, local storage">
+  <meta name="keywords"
+    content="LootLo, browsing history, visited stores, store categories, revisit stores, clear history, local storage">
   <meta property="og:title" content="History — LootLo">
   <meta property="og:description" content="Every store you've visited through LootLo, saved locally on your device.">
   <meta property="og:image" content="https://lootlo.site/lootlo.png">
   <link rel="stylesheet" href="style.css" />
   <link rel="shortcut icon" href="icon.webp" type="image/x-icon">
   <style>
-    .page-hero { padding: 28px 20px 20px; }
-    .page-hero h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 8px; }
-    .page-hero h1 em { font-style: normal; color: var(--gold); }
-    .page-hero p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+    nav a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .page-hero {
+      padding: 28px 20px 20px;
+    }
+
+    .page-hero h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .page-hero h1 em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .page-hero p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
 
     .eyebrow {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(92,184,224,0.1); border: 1px solid rgba(92,184,224,0.3);
-      color: var(--blue); font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase;
-      padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(92, 184, 224, 0.1);
+      border: 1px solid rgba(92, 184, 224, 0.3);
+      color: var(--blue);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
     }
 
     .summary {
-      display: flex; margin: 0 20px 24px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); overflow: hidden;
+      display: flex;
+      margin: 0 20px 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
     }
-    .summary-stat { flex: 1; padding: 14px 0; text-align: center; border-right: 1px solid var(--border); }
-    .summary-stat:last-child { border-right: none; }
-    .summary-num   { font-size: 1.2rem; font-weight: 800; color: var(--blue); line-height: 1; margin-bottom: 4px; }
-    .summary-label { font-size: 0.65rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
 
-    .history-section { padding: 0 20px; margin-bottom: 28px; }
-    .history-section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; }
+    .summary-stat {
+      flex: 1;
+      padding: 14px 0;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
 
-    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .summary-stat:last-child {
+      border-right: none;
+    }
+
+    .summary-num {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--blue);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .summary-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .history-section {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+
+    .history-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
     .history-item {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
       animation: slideUp 0.3s ease both;
     }
 
     .history-icon {
-      width: 36px; height: 36px; border-radius: 9px;
-      background: var(--surface2); border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
     }
 
-    .history-info { flex: 1; min-width: 0; }
-    .history-store { font-size: 0.87rem; font-weight: 600; margin-bottom: 2px; }
-    .history-cat   { font-size: 0.72rem; color: var(--muted); }
+    .history-info {
+      flex: 1;
+      min-width: 0;
+    }
 
-    .history-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-    .history-time  { font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+    .history-store {
+      font-size: 0.87rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .history-cat {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .history-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .history-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
 
     .revisit-btn {
-      font-size: 0.65rem; font-weight: 700; color: var(--gold);
-      background: var(--gold-glow); border: 1px solid var(--border-gold);
-      padding: 3px 8px; border-radius: 10px; cursor: pointer;
-      text-decoration: none; white-space: nowrap;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: var(--gold-glow);
+      border: 1px solid var(--border-gold);
+      padding: 3px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
     }
-    .revisit-btn:active { opacity: 0.7; }
 
-    .clear-wrap { padding: 0 20px 20px; text-align: center; }
-    .clear-btn {
-      background: transparent; border: 1px solid rgba(224,92,92,0.3);
-      color: var(--red); font-size: 0.8rem; font-weight: 600;
-      padding: 10px 20px; border-radius: var(--radius-sm);
-      cursor: pointer; width: 100%;
+    .revisit-btn:active {
+      opacity: 0.7;
     }
-    .clear-btn:active { opacity: 0.7; }
+
+    .clear-wrap {
+      padding: 0 20px 20px;
+      text-align: center;
+    }
+
+    .clear-btn {
+      background: transparent;
+      border: 1px solid rgba(224, 92, 92, 0.3);
+      color: var(--red);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .clear-btn:active {
+      opacity: 0.7;
+    }
   </style>
 </head>
+
 <body>
 
-<nav class="top-nav">
-  <div class="logo-text">Loot<span>Lo</span></div>
-  <div class="nav-right"><div class="nav-badge">Live Deals</div></div>
-</nav>
+  <nav class="top-nav">
+    <div class="logo-text">Loot<span>Lo</span></div>
+    <div class="nav-right">
+      <div class="nav-badge"><a href="privacy.html">Privacy</a></div>
+    </div>
+  </nav>
 
-<main class="main">
+  <main class="main">
 
-  <div class="page-hero">
-    <div class="eyebrow">🕐 Your Activity</div>
-    <h1>Browsing<br/><em>History</em></h1>
-    <p>Every store you've visited through LootLo, saved locally on your device.</p>
-  </div>
+    <div class="page-hero">
+      <div class="eyebrow">🕐 Your Activity</div>
+      <h1>Browsing<br /><em>History</em></h1>
+      <p>Every store you've visited through LootLo, saved locally on your device.</p>
+    </div>
 
-  <div class="summary" id="summary-row" style="display:none">
-    <div class="summary-stat"><div class="summary-num" id="stat-total">0</div><div class="summary-label">Visited</div></div>
-    <div class="summary-stat"><div class="summary-num" id="stat-stores">0</div><div class="summary-label">Stores</div></div>
-    <div class="summary-stat"><div class="summary-num" id="stat-cats">0</div><div class="summary-label">Categories</div></div>
-  </div>
+    <div class="summary" id="summary-row" style="display:none">
+      <div class="summary-stat">
+        <div class="summary-num" id="stat-total">0</div>
+        <div class="summary-label">Visited</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-num" id="stat-stores">0</div>
+        <div class="summary-label">Stores</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-num" id="stat-cats">0</div>
+        <div class="summary-label">Categories</div>
+      </div>
+    </div>
 
-  <div id="history-root"></div>
+    <div id="history-root"></div>
 
-  <div class="clear-wrap" id="clear-wrap" style="display:none">
-    <button class="clear-btn" id="clear-btn">🗑 Clear All History</button>
-  </div>
+    <div class="clear-wrap" id="clear-wrap" style="display:none">
+      <button class="clear-btn" id="clear-btn">🗑 Clear All History</button>
+    </div>
 
- <!-- FOOTER -->
-  <div class="main-footer">
-    <strong>Loot<span>Lo</span></strong><br/>
-    © 2026 LootLo · <a href="privacy.html">Privacy Policy</a><br/>
-    Affiliate links — we may earn a small commission.
-  </div>
+    <!-- FOOTER -->
+    <div class="main-footer">
+      <strong>Loot<span>Lo</span></strong><br />
+      © 2026 LootLo · <a href="privacy.html">Privacy Policy</a><br />
+      Affiliate links — we may earn a small commission.
+    </div>
 
 
-</main>
+  </main>
 
-<nav class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <a class="bottom-tab" href="/"><div class="bottom-tab-icon">🏠</div><div class="bottom-tab-label">Home</div></a>
-    <a class="bottom-tab" href="trending.html"><div class="bottom-tab-icon">🔥</div><div class="bottom-tab-label">Trending</div></a>
-    <a class="bottom-tab" href="toppicks.html"><div class="bottom-tab-icon">⭐</div><div class="bottom-tab-label">Top Picks</div></a>
-    <a class="bottom-tab active" href="history.html"><div class="bottom-tab-icon">🕐</div><div class="bottom-tab-label">History</div></a>
-  </div>
-</nav>
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a class="bottom-tab" href="/">
+        <div class="bottom-tab-icon">🏠</div>
+        <div class="bottom-tab-label">Home</div>
+      </a>
+      <a class="bottom-tab" href="trending.html">
+        <div class="bottom-tab-icon">🔥</div>
+        <div class="bottom-tab-label">Trending</div>
+      </a>
+      <a class="bottom-tab" href="toppicks.html">
+        <div class="bottom-tab-icon">⭐</div>
+        <div class="bottom-tab-label">Top Picks</div>
+      </a>
+      <a class="bottom-tab active" href="history.html">
+        <div class="bottom-tab-icon">🕐</div>
+        <div class="bottom-tab-label">History</div>
+      </a>
+    </div>
+  </nav>
 
-<div id="overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-body">
-      <div class="sheet-icon">🛍️</div>
-      <div class="sheet-title">Revisiting Store</div>
-      <div class="sheet-store" id="sheet-store-name">–</div>
-      <p class="sheet-note">We'll take you back to the pre-filtered section you visited before.</p>
-      <div class="progress-wrap"><div class="progress-bar" id="sheet-progress"></div></div>
-      <p class="sheet-disclaimer">⚡ Affiliate link — LootLo may earn a commission at no extra cost to you.</p>
-      <button class="btn-go" id="btn-go">Continue to Store →</button>
-      <button class="btn-back" id="btn-back">Go back</button>
+  <div id="overlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body">
+        <div class="sheet-icon">🛍️</div>
+        <div class="sheet-title">Revisiting Store</div>
+        <div class="sheet-store" id="sheet-store-name">–</div>
+        <p class="sheet-note">We'll take you back to the pre-filtered section you visited before.</p>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="sheet-progress"></div>
+        </div>
+        <p class="sheet-disclaimer">⚡ Affiliate link — LootLo may earn a commission at no extra cost to you.</p>
+        <button class="btn-go" id="btn-go">Continue to Store →</button>
+        <button class="btn-back" id="btn-back">Go back</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-// History page uses localStorage only — no Firebase needed.
-// Store metadata is fetched once from Firebase when available to keep URLs fresh,
-// but falls back to localStorage cache for offline use.
+  <script>
+    // History page uses localStorage only — no Firebase needed.
+    // Store metadata is fetched once from Firebase when available to keep URLs fresh,
+    // but falls back to localStorage cache for offline use.
 
-const STORE_META_CACHE_KEY = 'sv_store_meta';
+    const STORE_META_CACHE_KEY = 'sv_store_meta';
 
-function getVisited() {
-  try { return JSON.parse(localStorage.getItem('sv_visited') || '{}'); } catch { return {}; }
-}
-function getStoreMeta() {
-  try { return JSON.parse(localStorage.getItem(STORE_META_CACHE_KEY) || '{}'); } catch { return {}; }
-}
+    function getVisited() {
+      try { return JSON.parse(localStorage.getItem('sv_visited') || '{}'); } catch { return {}; }
+    }
+    function getStoreMeta() {
+      try { return JSON.parse(localStorage.getItem(STORE_META_CACHE_KEY) || '{}'); } catch { return {}; }
+    }
 
-function buildHistory() {
-  const visited   = getVisited();
-  const storeMeta = getStoreMeta();
-  const keys = Object.keys(visited).filter(k => visited[k]);
-  return keys.map(key => {
-    const meta = storeMeta[key] || {};
-    const parts = key.split('_');
-    const storeName = parts.slice(1).join('_');
-    return {
-      key, storeName,
-      icon: meta.icon || '🛍️',
-      cat:  meta.cat  || 'Fashion',
-      url:  meta.url  || '#'
-    };
-  });
-}
+    function buildHistory() {
+      const visited = getVisited();
+      const storeMeta = getStoreMeta();
+      const keys = Object.keys(visited).filter(k => visited[k]);
+      return keys.map(key => {
+        const meta = storeMeta[key] || {};
+        const parts = key.split('_');
+        const storeName = parts.slice(1).join('_');
+        return {
+          key, storeName,
+          icon: meta.icon || '🛍️',
+          cat: meta.cat || 'Fashion',
+          url: meta.url || '#'
+        };
+      });
+    }
 
-let pendingUrl = null;
+    let pendingUrl = null;
 
-function openSheet(name, url) {
-  pendingUrl = url;
-  document.getElementById('sheet-store-name').textContent = name;
-  document.getElementById('overlay').classList.add('open');
-  const bar = document.getElementById('sheet-progress');
-  bar.style.width = '0%';
-  requestAnimationFrame(() => { bar.style.width = '100%'; });
-}
-function closeSheet() {
-  document.getElementById('overlay').classList.remove('open');
-  pendingUrl = null;
-  const bar = document.getElementById('sheet-progress');
-  bar.style.transition = 'none'; bar.style.width = '0%';
-  setTimeout(() => { bar.style.transition = 'width 3s linear'; }, 50);
-}
+    function openSheet(name, url) {
+      pendingUrl = url;
+      document.getElementById('sheet-store-name').textContent = name;
+      document.getElementById('overlay').classList.add('open');
+      const bar = document.getElementById('sheet-progress');
+      bar.style.width = '0%';
+      requestAnimationFrame(() => { bar.style.width = '100%'; });
+    }
+    function closeSheet() {
+      document.getElementById('overlay').classList.remove('open');
+      pendingUrl = null;
+      const bar = document.getElementById('sheet-progress');
+      bar.style.transition = 'none'; bar.style.width = '0%';
+      setTimeout(() => { bar.style.transition = 'width 3s linear'; }, 50);
+    }
 
-document.getElementById('btn-go').addEventListener('click', () => {
-  if (pendingUrl) window.open(pendingUrl, '_blank', 'noopener');
-  closeSheet();
-});
-document.getElementById('btn-back').addEventListener('click', closeSheet);
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('overlay')) closeSheet();
-});
+    document.getElementById('btn-go').addEventListener('click', () => {
+      if (pendingUrl) window.open(pendingUrl, '_blank', 'noopener');
+      closeSheet();
+    });
+    document.getElementById('btn-back').addEventListener('click', closeSheet);
+    document.getElementById('overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('overlay')) closeSheet();
+    });
 
-document.getElementById('clear-btn').addEventListener('click', () => {
-  if (confirm('Clear all browsing history?')) {
-    localStorage.removeItem('sv_visited');
-    render();
-  }
-});
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      if (confirm('Clear all browsing history?')) {
+        localStorage.removeItem('sv_visited');
+        render();
+      }
+    });
 
-function render() {
-  const entries = buildHistory();
-  const root    = document.getElementById('history-root');
-  root.innerHTML = '';
+    function render() {
+      const entries = buildHistory();
+      const root = document.getElementById('history-root');
+      root.innerHTML = '';
 
-  if (!entries.length) {
-    document.getElementById('summary-row').style.display = 'none';
-    document.getElementById('clear-wrap').style.display  = 'none';
-    root.innerHTML = `
+      if (!entries.length) {
+        document.getElementById('summary-row').style.display = 'none';
+        document.getElementById('clear-wrap').style.display = 'none';
+        root.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">🛍️</div>
         <div class="empty-title">No history yet</div>
         <div class="empty-desc">Stores you visit through StyleVault will appear here so you can quickly revisit them.</div>
         <a class="empty-cta" href="stylevault.html" style="display:inline-block;background:var(--gold);color:#0a0a0c;font-weight:700;font-size:.85rem;padding:11px 22px;border-radius:var(--radius-sm);text-decoration:none;margin-top:16px;">Start Browsing →</a>
       </div>`;
-    return;
-  }
+        return;
+      }
 
-  const uniqueStores = new Set(entries.map(e => e.storeName)).size;
-  const uniqueCats   = new Set(entries.map(e => e.cat)).size;
-  document.getElementById('stat-total').textContent  = entries.length;
-  document.getElementById('stat-stores').textContent = uniqueStores;
-  document.getElementById('stat-cats').textContent   = uniqueCats;
-  document.getElementById('summary-row').style.display = 'flex';
-  document.getElementById('clear-wrap').style.display  = 'block';
+      const uniqueStores = new Set(entries.map(e => e.storeName)).size;
+      const uniqueCats = new Set(entries.map(e => e.cat)).size;
+      document.getElementById('stat-total').textContent = entries.length;
+      document.getElementById('stat-stores').textContent = uniqueStores;
+      document.getElementById('stat-cats').textContent = uniqueCats;
+      document.getElementById('summary-row').style.display = 'flex';
+      document.getElementById('clear-wrap').style.display = 'block';
 
-  const groups = {};
-  entries.forEach(e => {
-    if (!groups[e.cat]) groups[e.cat] = [];
-    groups[e.cat].push(e);
-  });
+      const groups = {};
+      entries.forEach(e => {
+        if (!groups[e.cat]) groups[e.cat] = [];
+        groups[e.cat].push(e);
+      });
 
-  Object.entries(groups).forEach(([cat, items]) => {
-    const section = document.createElement('div');
-    section.className = 'history-section';
-    section.innerHTML = `<div class="history-section-title">${cat}</div><div class="history-list"></div>`;
-    root.appendChild(section);
+      Object.entries(groups).forEach(([cat, items]) => {
+        const section = document.createElement('div');
+        section.className = 'history-section';
+        section.innerHTML = `<div class="history-section-title">${cat}</div><div class="history-list"></div>`;
+        root.appendChild(section);
 
-    const list = section.querySelector('.history-list');
-    items.forEach((entry, i) => {
-      const el = document.createElement('div');
-      el.className = 'history-item';
-      el.style.animationDelay = `${i * 0.04}s`;
-      el.innerHTML = `
+        const list = section.querySelector('.history-list');
+        items.forEach((entry, i) => {
+          const el = document.createElement('div');
+          el.className = 'history-item';
+          el.style.animationDelay = `${i * 0.04}s`;
+          el.innerHTML = `
         <div class="history-icon">${entry.icon}</div>
         <div class="history-info">
           <div class="history-store">${entry.storeName}</div>
@@ -260,47 +412,48 @@ function render() {
           <a class="revisit-btn" href="#"
              data-url="${entry.url}" data-name="${entry.storeName}">Revisit →</a>
         </div>`;
-      list.appendChild(el);
-    });
-  });
-
-  root.querySelectorAll('.revisit-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      openSheet(btn.dataset.name, btn.dataset.url);
-    });
-  });
-}
-
-// Try to refresh store metadata from Firebase cards (best-effort)
-// This enriches the history with fresh URLs/icons without blocking the UI.
-(async function tryRefreshMeta() {
-  try {
-    // firebase-config.js must already be loaded (it's a regular script earlier in the page)
-    if (typeof window.FIREBASE_CONFIG === 'undefined') return;
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-    const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-    const app  = initializeApp(window.FIREBASE_CONFIG, 'history-app');
-    const db   = getDatabase(app);
-    const snap = await get(ref(db, 'cards'));
-    if (!snap.exists()) return;
-    const meta = {};
-    snap.forEach(child => {
-      const card = child.val();
-      (card.stores || []).forEach(s => {
-        const key = `${card.id}_${s.name}`;
-        meta[key] = { icon: s.icon, cat: card.title, url: s.url };
+          list.appendChild(el);
+        });
       });
-    });
-    localStorage.setItem(STORE_META_CACHE_KEY, JSON.stringify(meta));
-    render(); // re-render with fresh metadata
-  } catch (e) {
-    // silently fail; cached or default metadata is fine
-  }
-})();
 
-render();
-</script>
-<script src="firebase-config.js"></script>
+      root.querySelectorAll('.revisit-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          openSheet(btn.dataset.name, btn.dataset.url);
+        });
+      });
+    }
+
+    // Try to refresh store metadata from Firebase cards (best-effort)
+    // This enriches the history with fresh URLs/icons without blocking the UI.
+    (async function tryRefreshMeta() {
+      try {
+        // firebase-config.js must already be loaded (it's a regular script earlier in the page)
+        if (typeof window.FIREBASE_CONFIG === 'undefined') return;
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+        const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+        const app = initializeApp(window.FIREBASE_CONFIG, 'history-app');
+        const db = getDatabase(app);
+        const snap = await get(ref(db, 'cards'));
+        if (!snap.exists()) return;
+        const meta = {};
+        snap.forEach(child => {
+          const card = child.val();
+          (card.stores || []).forEach(s => {
+            const key = `${card.id}_${s.name}`;
+            meta[key] = { icon: s.icon, cat: card.title, url: s.url };
+          });
+        });
+        localStorage.setItem(STORE_META_CACHE_KEY, JSON.stringify(meta));
+        render(); // re-render with fresh metadata
+      } catch (e) {
+        // silently fail; cached or default metadata is fine
+      }
+    })();
+
+    render();
+  </script>
+  <script src="firebase-config.js"></script>
 </body>
+
 </html>
