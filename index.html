@@ -47,14 +47,43 @@
 </head>
 
 <body>
-
+   
   <!-- TOP NAV -->
   <nav class="top-nav">
-    <div class="logo-text">Loot<span>Lo</span></div>
+    <div class="nav-left">
+      <div class="hamburger-btn" id="hamburger-btn">☰</div>
+      <div class="logo-text">Loot<span>Lo</span></div>
+    </div>
+
     <div class="nav-right">
-      <div class="nav-badge"><a href="privacy.html">Privacy</a></div>
+      <div class="nav-badge">Deals</div>
     </div>
   </nav>
+
+  <!-- HAMBURGER MENU OVERLAY -->
+  <div id="menu-overlay">
+    <div class="menu-panel">
+      <div class="menu-header">
+        <div class="logo-text">Loot<span>Lo</span></div>
+        <div class="menu-close" id="menu-close">✕</div>
+      </div>
+      <a class="menu-item active" href="/">
+        <span class="menu-item-icon">🏠</span> Home
+      </a>
+      <a class="menu-item" href="trending.html">
+        <span class="menu-item-icon">🔥</span> Trending
+      </a>
+      <a class="menu-item" href="toppicks.html">
+        <span class="menu-item-icon">⭐</span> Top Picks
+      </a>
+      <a class="menu-item" href="history.html">
+        <span class="menu-item-icon">🕐</span> History
+      </a>
+      <a class="menu-item" href="privacy.html">
+        <span class="menu-item-icon">🔒</span> Privacy Policy
+      </a>
+    </div>
+  </div>
 
   <!-- MAIN -->
   <main class="main">
@@ -153,27 +182,7 @@
 
   </main>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <a class="bottom-tab active" href="/">
-        <div class="bottom-tab-icon">🏠</div>
-        <div class="bottom-tab-label">Home</div>
-      </a>
-      <a class="bottom-tab" href="trending.html">
-        <div class="bottom-tab-icon">🔥</div>
-        <div class="bottom-tab-label">Trending</div>
-      </a>
-      <a class="bottom-tab" href="toppicks.html">
-        <div class="bottom-tab-icon">⭐</div>
-        <div class="bottom-tab-label">Top Picks</div>
-      </a>
-      <a class="bottom-tab" href="history.html">
-        <div class="bottom-tab-icon">🕐</div>
-        <div class="bottom-tab-label">History</div>
-      </a>
-    </div>
-  </nav>
+  <!-- Bottom nav removed — navigation now via hamburger menu -->
 
   <!-- BOTTOM SHEET POPUP -->
   <div id="overlay">
@@ -333,7 +342,8 @@
       </div>
       <div class="card-desc">${card.desc}</div>
       ${topBanner}
-      <div class="stores">${storesHTML}</div>`;
+      <div class="stores">${storesHTML}</div>
+      <!-- <a class="explore-more-btn" href="explore.html?id=${card.id || card._key}">Explore More →</a> -->`;
       return el;
     }
 
@@ -478,6 +488,18 @@
       chip.classList.add('active');
       resetAndLoad(chip.dataset.cat);
       document.getElementById('cards-root').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // ── Hamburger menu ─────────────────────────────────────
+    const menuOverlay = document.getElementById('menu-overlay');
+    document.getElementById('hamburger-btn').addEventListener('click', () => {
+      menuOverlay.classList.add('open');
+    });
+    document.getElementById('menu-close').addEventListener('click', () => {
+      menuOverlay.classList.remove('open');
+    });
+    menuOverlay.addEventListener('click', e => {
+      if (e.target === menuOverlay) menuOverlay.classList.remove('open');
     });
 
     // ── Sheet ─────────────────────────────────────────────

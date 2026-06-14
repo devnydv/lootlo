@@ -344,6 +344,29 @@
     .sk-ln.w45 {
       width: 45%;
     }
+
+    /* ── DESKTOP ── */
+    @media (min-width: 768px) {
+      .trend-hero {
+        padding: 40px 0 24px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .trend-hero h1 { font-size: 2.6rem; }
+      .trend-hero p { max-width: 480px; font-size: 0.95rem; }
+
+      .spotlight { margin: 0 0 28px; }
+      .trend-section { padding: 0; }
+
+      .trend-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .heat-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (min-width: 1100px) {
+      .trend-list { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
   <script type="application/json">
     {
@@ -360,13 +383,40 @@
 
 <body>
 
-  <nav class="top-nav">
-    <div class="logo-text">Loot<span>Lo</span></div>
+ <nav class="top-nav">
+    <div class="nav-left">
+      <div class="hamburger-btn" id="hamburger-btn">☰</div>
+      <div class="logo-text">Loot<span>Lo</span></div>
+    </div>
+
     <div class="nav-right">
-      <div class="nav-badge"><a href="privacy.html">Privacy</a></div>
+      <div class="nav-badge">Trending</div>
     </div>
   </nav>
-
+<!-- HAMBURGER MENU OVERLAY -->
+  <div id="menu-overlay">
+    <div class="menu-panel">
+      <div class="menu-header">
+        <div class="logo-text">Loot<span>Lo</span></div>
+        <div class="menu-close" id="menu-close">✕</div>
+      </div>
+      <a class="menu-item" href="/">
+        <span class="menu-item-icon">🏠</span> Home
+      </a>
+      <a class="menu-item active" href="trending.html">
+        <span class="menu-item-icon">🔥</span> Trending
+      </a>
+      <a class="menu-item" href="toppicks.html">
+        <span class="menu-item-icon">⭐</span> Top Picks
+      </a>
+      <a class="menu-item" href="history.html">
+        <span class="menu-item-icon">🕐</span> History
+      </a>
+      <a class="menu-item" href="privacy.html">
+        <span class="menu-item-icon">🔒</span> Privacy Policy
+      </a>
+    </div>
+  </div>
   <main class="main">
 
     <div class="trend-hero">
@@ -408,26 +458,7 @@
 
   </main>
 
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <a class="bottom-tab" href="/">
-        <div class="bottom-tab-icon">🏠</div>
-        <div class="bottom-tab-label">Home</div>
-      </a>
-      <a class="bottom-tab active" href="trending.html">
-        <div class="bottom-tab-icon">🔥</div>
-        <div class="bottom-tab-label">Trending</div>
-      </a>
-      <a class="bottom-tab" href="toppicks.html">
-        <div class="bottom-tab-icon">⭐</div>
-        <div class="bottom-tab-label">Top Picks</div>
-      </a>
-      <a class="bottom-tab" href="history.html">
-        <div class="bottom-tab-icon">🕐</div>
-        <div class="bottom-tab-label">History</div>
-      </a>
-    </div>
-  </nav>
+  <!-- Bottom nav removed — navigation now via hamburger menu -->
 
   <script src="firebase-config.js"></script>
   <script type="module">
@@ -587,6 +618,18 @@
       if (entries[0].isIntersecting) loadTrendItems();
     }, { rootMargin: '200px' });
     observer.observe(document.getElementById('load-sentinel'));
+
+    // ── Hamburger menu ──
+    const menuOverlay = document.getElementById('menu-overlay');
+    document.getElementById('hamburger-btn').addEventListener('click', () => {
+      menuOverlay.classList.add('open');
+    });
+    document.getElementById('menu-close').addEventListener('click', () => {
+      menuOverlay.classList.remove('open');
+    });
+    menuOverlay.addEventListener('click', e => {
+      if (e.target === menuOverlay) menuOverlay.classList.remove('open');
+    });
 
     // ── Boot ──
     showSkeletons(4);

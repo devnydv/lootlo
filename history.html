@@ -203,17 +203,78 @@
     .clear-btn:active {
       opacity: 0.7;
     }
+
+    /* ── DESKTOP ── */
+    @media (min-width: 768px) {
+      .page-hero {
+        padding: 40px 0 24px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .page-hero h1 { font-size: 2.6rem; }
+      .page-hero p { max-width: 480px; font-size: 0.95rem; }
+
+      .summary {
+        margin: 0 auto 24px;
+        max-width: 480px;
+      }
+
+      .history-section { padding: 0; }
+
+      .history-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .clear-wrap { padding: 0 0 20px; }
+      .clear-btn { max-width: 320px; margin: 0 auto; }
+    }
+
+    @media (min-width: 1100px) {
+      .history-list { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 
 <body>
 
   <nav class="top-nav">
-    <div class="logo-text">Loot<span>Lo</span></div>
+    <div class="nav-left">
+      <div class="hamburger-btn" id="hamburger-btn">☰</div>
+      <div class="logo-text">Loot<span>Lo</span></div>
+    </div>
     <div class="nav-right">
       <div class="nav-badge"><a href="privacy.html">Privacy</a></div>
     </div>
   </nav>
+
+  <!-- HAMBURGER MENU OVERLAY -->
+  <div id="menu-overlay">
+    <div class="menu-panel">
+      <div class="menu-header">
+        <div class="logo-text">Loot<span>Lo</span></div>
+        <div class="menu-close" id="menu-close">✕</div>
+      </div>
+      <a class="menu-item" href="/">
+        <span class="menu-item-icon">🏠</span> Home
+      </a>
+      <a class="menu-item" href="trending.html">
+        <span class="menu-item-icon">🔥</span> Trending
+      </a>
+      <a class="menu-item" href="toppicks.html">
+        <span class="menu-item-icon">⭐</span> Top Picks
+      </a>
+      <a class="menu-item active" href="history.html">
+        <span class="menu-item-icon">🕐</span> History
+      </a>
+      <a class="menu-item" href="privacy.html">
+        <span class="menu-item-icon">🔒</span> Privacy Policy
+      </a>
+    </div>
+  </div>
 
   <main class="main">
 
@@ -254,26 +315,7 @@
 
   </main>
 
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <a class="bottom-tab" href="/">
-        <div class="bottom-tab-icon">🏠</div>
-        <div class="bottom-tab-label">Home</div>
-      </a>
-      <a class="bottom-tab" href="trending.html">
-        <div class="bottom-tab-icon">🔥</div>
-        <div class="bottom-tab-label">Trending</div>
-      </a>
-      <a class="bottom-tab" href="toppicks.html">
-        <div class="bottom-tab-icon">⭐</div>
-        <div class="bottom-tab-label">Top Picks</div>
-      </a>
-      <a class="bottom-tab active" href="history.html">
-        <div class="bottom-tab-icon">🕐</div>
-        <div class="bottom-tab-label">History</div>
-      </a>
-    </div>
-  </nav>
+  <!-- Bottom nav removed — navigation now via hamburger menu -->
 
   <div id="overlay">
     <div class="sheet">
@@ -323,6 +365,18 @@
         };
       });
     }
+
+    // ── Hamburger menu ──
+    const menuOverlay = document.getElementById('menu-overlay');
+    document.getElementById('hamburger-btn').addEventListener('click', () => {
+      menuOverlay.classList.add('open');
+    });
+    document.getElementById('menu-close').addEventListener('click', () => {
+      menuOverlay.classList.remove('open');
+    });
+    menuOverlay.addEventListener('click', e => {
+      if (e.target === menuOverlay) menuOverlay.classList.remove('open');
+    });
 
     let pendingUrl = null;
 
@@ -401,6 +455,10 @@
           const el = document.createElement('div');
           el.className = 'history-item';
           el.style.animationDelay = `${i * 0.04}s`;
+          const hasUrl = entry.url && entry.url !== '#';
+          const revisitHTML = hasUrl
+            ? `<a class="revisit-btn" href="#" data-url="${entry.url}" data-name="${entry.storeName}">Revisit →</a>`
+            : `<span class="revisit-btn" style="opacity:.4;cursor:default;">Unavailable</span>`;
           el.innerHTML = `
         <div class="history-icon">${entry.icon}</div>
         <div class="history-info">
@@ -409,14 +467,13 @@
         </div>
         <div class="history-right">
           <span class="history-time">Visited</span>
-          <a class="revisit-btn" href="#"
-             data-url="${entry.url}" data-name="${entry.storeName}">Revisit →</a>
+          ${revisitHTML}
         </div>`;
           list.appendChild(el);
         });
       });
 
-      root.querySelectorAll('.revisit-btn').forEach(btn => {
+      root.querySelectorAll('.revisit-btn[data-url]').forEach(btn => {
         btn.addEventListener('click', e => {
           e.preventDefault();
           openSheet(btn.dataset.name, btn.dataset.url);
